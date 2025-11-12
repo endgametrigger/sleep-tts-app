@@ -1,0 +1,414 @@
+/* ============================
+   GLOBAL STYLES & RESET
+   ============================ */
+
+/* Apply box-sizing to all elements for easier sizing calculations */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Root CSS variables for easy color management and consistency */
+:root {
+    /* Calming dark blue/purple color palette for relaxation */
+    --primary-bg: #1a1a2e;        /* Very dark navy blue - main background */
+    --secondary-bg: #16213e;       /* Dark blue - card backgrounds */
+    --accent-color: #0f3460;       /* Medium blue - accents and borders */
+    --highlight-color: #533483;    /* Purple - buttons and highlights */
+    --highlight-hover: #6b4298;    /* Lighter purple - button hover state */
+    --text-primary: #e4e4e4;       /* Light gray - main text */
+    --text-secondary: #a0a0a0;     /* Medium gray - secondary text */
+    --success-color: #4ecca3;      /* Teal green - success messages */
+    --error-color: #ee6055;        /* Soft red - error messages */
+
+    /* Spacing and sizing variables */
+    --border-radius: 12px;
+    --max-width: 800px;
+}
+
+/* ============================
+   BODY & CONTAINER
+   ============================ */
+
+/* Main body styling - sets the background and centers content */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--primary-bg) 0%, #0f0f1e 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Main container that centers and limits width of content */
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ============================
+   HEADER SECTION
+   ============================ */
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 0;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+}
+
+/* ============================
+   CARD COMPONENT
+   ============================ */
+
+/* Main card that contains the app functionality */
+.card {
+    background-color: var(--secondary-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    margin-bottom: 30px;
+}
+
+/* ============================
+   INPUT SECTION
+   ============================ */
+
+.input-section {
+    margin-bottom: 25px;
+}
+
+.input-section label {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* Textarea styling - where users paste their text */
+textarea {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical; /* Allows user to resize vertically only */
+    transition: border-color 0.3s ease;
+    min-height: 200px;
+}
+
+/* Change border color when textarea is focused */
+textarea:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+/* Placeholder text styling */
+textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Character count and cost info display */
+.text-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ============================
+   BUTTON SECTION
+   ============================ */
+
+.button-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Main generate button styling */
+.generate-btn {
+    background: linear-gradient(135deg, var(--highlight-color) 0%, var(--highlight-hover) 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(83, 52, 131, 0.4);
+}
+
+/* Button hover effect */
+.generate-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(83, 52, 131, 0.6);
+}
+
+/* Button disabled state (shown when loading) */
+.generate-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Loading spinner animation */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+/* Keyframe animation for the spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================
+   ERROR MESSAGE
+   ============================ */
+
+/* Error message styling (shown when something goes wrong) */
+.error-message {
+    background-color: rgba(238, 96, 85, 0.15);
+    border-left: 4px solid var(--error-color);
+    color: var(--error-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+/* ============================
+   AUDIO SECTION
+   ============================ */
+
+/* Container for the audio player and controls */
+.audio-section {
+    background-color: var(--accent-color);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    margin-top: 20px;
+}
+
+.audio-section h3 {
+    color: var(--success-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+/* HTML5 audio player styling */
+audio {
+    width: 100%;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    outline: none;
+}
+
+/* Customize audio player controls (limited browser support) */
+audio::-webkit-media-controls-panel {
+    background-color: var(--secondary-bg);
+}
+
+/* ============================
+   SPEED CONTROL
+   ============================ */
+
+.speed-control {
+    margin-bottom: 20px;
+}
+
+.speed-control label {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+#speedValue {
+    color: var(--highlight-hover);
+    font-weight: 700;
+}
+
+/* Range slider styling */
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: var(--secondary-bg);
+    outline: none;
+    margin-bottom: 8px;
+}
+
+/* Slider thumb (the draggable part) for Webkit browsers (Chrome, Safari) */
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--highlight-color);
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--highlight-hover);
+}
+
+/* Slider thumb for Firefox */
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--highlight-color);
+    cursor: pointer;
+    border: none;
+}
+
+/* Speed labels (0.75x and 1.25x indicators) */
+.speed-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ============================
+   GENERATION INFO
+   ============================ */
+
+/* Display info about the generated audio */
+.generation-info {
+    background-color: var(--secondary-bg);
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.generation-info p {
+    margin-bottom: 8px;
+}
+
+.generation-info p:last-child {
+    margin-bottom: 0;
+}
+
+.generation-info strong {
+    color: var(--text-primary);
+}
+
+.generation-info span {
+    color: var(--success-color);
+}
+
+/* ============================
+   FOOTER
+   ============================ */
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+footer p {
+    margin-bottom: 8px;
+}
+
+.tip {
+    color: var(--highlight-hover);
+    font-style: italic;
+}
+
+/* ============================
+   RESPONSIVE DESIGN
+   (Mobile devices)
+   ============================ */
+
+/* Adjustments for tablets and smaller devices */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .generate-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .text-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+/* Adjustments for mobile phones */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 0 10px;
+    }
+
+    header {
+        margin-bottom: 25px;
+        padding: 20px 0;
+    }
+
+    header h1 {
+        font-size: 1.75rem;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    textarea {
+        min-height: 150px;
+        font-size: 0.95rem;
+    }
+
+    .generate-btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+}

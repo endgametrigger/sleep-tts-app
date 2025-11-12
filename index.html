@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Character encoding for proper text display -->
+    <meta charset="UTF-8">
+
+    <!-- Makes the website responsive on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title that appears in the browser tab -->
+    <title>Sleep TTS - Text to Speech for Relaxation</title>
+
+    <!-- Link to our external CSS file for styling -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main container that holds all content -->
+    <div class="container">
+
+        <!-- Header Section -->
+        <header>
+            <h1>🌙 Sleep TTS</h1>
+            <p class="subtitle">Transform text into soothing speech for relaxation and sleep</p>
+        </header>
+
+        <!-- Main Content Card -->
+        <div class="card">
+
+            <!-- Text Input Section -->
+            <div class="input-section">
+                <label for="textInput">
+                    Paste your story, article, or any text you'd like to listen to:
+                </label>
+
+                <!-- Large textarea where users paste their text -->
+                <textarea
+                    id="textInput"
+                    placeholder="Paste your text here... (Max 4096 characters)&#10;&#10;Try a bedtime story, meditation script, or article you'd like to listen to while relaxing."
+                    maxlength="4096"
+                    rows="10"
+                ></textarea>
+
+                <!-- Character count and estimated cost display -->
+                <div class="text-info">
+                    <span id="charCount">0 / 4096 characters</span>
+                    <span id="estimatedCost">Estimated cost: $0.00</span>
+                </div>
+            </div>
+
+            <!-- Generate Button Section -->
+            <div class="button-section">
+                <button id="generateBtn" class="generate-btn">
+                    <span id="btnText">Generate Audio</span>
+                    <!-- Loading spinner (hidden by default, shown when generating) -->
+                    <span id="spinner" class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+
+            <!-- Error Message Display (hidden by default) -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <!-- Audio Player Section (hidden until audio is generated) -->
+            <div id="audioSection" class="audio-section" style="display: none;">
+                <h3>Your Audio is Ready!</h3>
+
+                <!-- HTML5 audio player with controls -->
+                <audio id="audioPlayer" controls>
+                    Your browser does not support the audio element.
+                </audio>
+
+                <!-- Playback Speed Control -->
+                <div class="speed-control">
+                    <label for="speedSlider">
+                        Playback Speed: <span id="speedValue">1.00x</span>
+                    </label>
+                    <input
+                        type="range"
+                        id="speedSlider"
+                        min="0.75"
+                        max="1.25"
+                        step="0.05"
+                        value="1.00"
+                    >
+                    <div class="speed-labels">
+                        <span>0.75x (Slower)</span>
+                        <span>1.25x (Faster)</span>
+                    </div>
+                </div>
+
+                <!-- Generation Info (shows character count and cost) -->
+                <div class="generation-info">
+                    <p>
+                        <strong>Characters processed:</strong> <span id="processedChars">0</span>
+                    </p>
+                    <p>
+                        <strong>Estimated cost:</strong> $<span id="actualCost">0.00</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <footer>
+            <p>Using OpenAI's TTS API with Shimmer voice</p>
+            <p class="tip">💡 Tip: For best sleep experience, use headphones and set volume low</p>
+        </footer>
+    </div>
+
+    <!-- Link to our external JavaScript file -->
+    <!-- This must be at the end so the HTML elements load first -->
+    <script src="script.js"></script>
+</body>
+</html>
