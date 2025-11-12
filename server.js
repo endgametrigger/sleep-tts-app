@@ -46,8 +46,8 @@ app.use(express.static('.'));
 // This is where our frontend will send text to be converted to speech
 app.post('/api/generate-speech', async (req, res) => {
   try {
-    // Extract the text from the request body that was sent from the frontend
-    const { text } = req.body;
+    // Extract the text and voice from the request body that was sent from the frontend
+    const { text, voice } = req.body;
 
     // Validation: Make sure text was actually provided
     if (!text) {
@@ -63,6 +63,20 @@ app.post('/api/generate-speech', async (req, res) => {
       });
     }
 
+    // Define the list of valid OpenAI TTS voices
+    // These are the three most soothing voices for relaxation
+    const validVoices = ['shimmer', 'alloy', 'nova'];
+
+    // Get the voice from the request, or default to 'shimmer' if not provided
+    let selectedVoice = voice || 'shimmer';
+
+    // Validation: Make sure the voice is one of the allowed voices
+    // This prevents users from sending invalid voice names to OpenAI
+    if (!validVoices.includes(selectedVoice)) {
+      console.warn(`Invalid voice "${selectedVoice}" requested, defaulting to shimmer`);
+      selectedVoice = 'shimmer'; // Fall back to default voice
+    }
+
     // Get the API key from environment variables (loaded from .env file)
     const apiKey = process.env.OPENAI_API_KEY;
 
@@ -74,7 +88,7 @@ app.post('/api/generate-speech', async (req, res) => {
       });
     }
 
-    console.log(`Generating speech for ${text.length} characters...`);
+    console.log(`Generating speech for ${text.length} characters using "${selectedVoice}" voice...`);
 
     // Make a request to OpenAI's Text-to-Speech API
     const response = await axios.post(
@@ -82,7 +96,7 @@ app.post('/api/generate-speech', async (req, res) => {
       {
         model: 'tts-1',           // Use tts-1 model (faster and cheaper than tts-1-hd)
         input: text,               // The text to convert to speech
-        voice: 'shimmer',          // Use "shimmer" voice (most soothing for relaxation)
+        voice: selectedVoice,      // Use the voice selected by the user (shimmer, alloy, or nova)
         response_format: 'mp3'     // Get audio back as MP3 file
       },
       {

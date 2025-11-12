@@ -137,6 +137,61 @@ textarea::placeholder {
 }
 
 /* ============================
+   VOICE SELECTION SECTION
+   ============================ */
+
+/* Container for voice selection dropdown */
+.voice-section {
+    margin-bottom: 25px;
+}
+
+.voice-section label {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* Voice selection dropdown styling */
+.voice-select {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    appearance: none; /* Remove default browser styling */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e4e4e4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+    padding-right: 45px; /* Make room for the dropdown arrow */
+}
+
+/* Change border color when dropdown is focused */
+.voice-select:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+/* Hover effect for the dropdown */
+.voice-select:hover {
+    border-color: var(--highlight-hover);
+}
+
+/* Styling for dropdown options */
+.voice-select option {
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    padding: 10px;
+}
+
+/* ============================
    BUTTON SECTION
    ============================ */
 

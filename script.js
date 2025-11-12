@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get all the elements we need to interact with from the HTML
     const textInput = document.getElementById('textInput');           // The textarea where user types
+    const voiceSelect = document.getElementById('voiceSelect');       // The voice selection dropdown
     const generateBtn = document.getElementById('generateBtn');       // The "Generate Audio" button
     const btnText = document.getElementById('btnText');               // The text inside the button
     const spinner = document.getElementById('spinner');               // The loading spinner
@@ -81,6 +82,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the text from the textarea
         const text = textInput.value.trim(); // trim() removes extra spaces at start/end
 
+        // Get the selected voice from the dropdown
+        // This will be one of: 'shimmer', 'alloy', or 'nova'
+        const selectedVoice = voiceSelect.value;
+
         // Validation: Check if text is empty
         if (!text) {
             showError('Please enter some text to convert to speech.');
@@ -102,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update UI to show loading state
         setLoadingState(true);
 
+        // Log which voice we're using (helpful for debugging)
+        console.log(`Generating speech with voice: ${selectedVoice}`);
+
         try {
             // Make a POST request to our backend server
             // fetch() is a built-in JavaScript function for making HTTP requests
@@ -110,7 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json'  // Tell server we're sending JSON
                 },
-                body: JSON.stringify({ text: text })    // Convert our data to JSON string
+                // Send both the text and the selected voice to the backend
+                body: JSON.stringify({
+                    text: text,              // The text to convert to speech
+                    voice: selectedVoice     // The voice to use (shimmer, alloy, or nova)
+                })
             });
 
             // Parse the JSON response from the server

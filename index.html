@@ -47,6 +47,20 @@
                 </div>
             </div>
 
+            <!-- Voice Selection Section -->
+            <div class="voice-section">
+                <label for="voiceSelect">
+                    Voice:
+                </label>
+
+                <!-- Dropdown to select the voice for text-to-speech -->
+                <select id="voiceSelect" class="voice-select">
+                    <option value="shimmer" selected>Shimmer - Soft, warm, feminine</option>
+                    <option value="alloy">Alloy - Neutral, calm, balanced</option>
+                    <option value="nova">Nova - Friendly, gentle, feminine</option>
+                </select>
+            </div>
+
             <!-- Generate Button Section -->
             <div class="button-section">
                 <button id="generateBtn" class="generate-btn">
@@ -101,7 +115,7 @@
 
         <!-- Footer Section -->
         <footer>
-            <p>Using OpenAI's TTS API with Shimmer voice</p>
+            <p>Using OpenAI's TTS API with multiple soothing voices</p>
             <p class="tip">💡 Tip: For best sleep experience, use headphones and set volume low</p>
         </footer>
     </div>
