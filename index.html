@@ -35,15 +35,41 @@
                 <!-- Large textarea where users paste their text -->
                 <textarea
                     id="textInput"
-                    placeholder="Paste your text here... (Max 4096 characters)&#10;&#10;Try a bedtime story, meditation script, or article you'd like to listen to while relaxing."
-                    maxlength="4096"
+                    placeholder="Paste your text here... (Max 10,000 characters)&#10;&#10;Try a bedtime story, meditation script, or article you'd like to listen to while relaxing."
+                    maxlength="10000"
                     rows="10"
                 ></textarea>
 
                 <!-- Character count and estimated cost display -->
                 <div class="text-info">
-                    <span id="charCount">0 / 4096 characters</span>
+                    <span id="charCount">0 / 10,000 characters</span>
                     <span id="estimatedCost">Estimated cost: $0.00</span>
+                </div>
+            </div>
+
+            <!-- TTS Provider Selection Section -->
+            <div class="provider-section">
+                <label class="section-label">
+                    TTS Provider:
+                </label>
+
+                <!-- Radio buttons to choose between OpenAI and ElevenLabs -->
+                <div class="provider-options">
+                    <label class="provider-option">
+                        <input type="radio" name="provider" value="openai" id="providerOpenAI" checked>
+                        <span class="provider-label">
+                            <strong>OpenAI</strong>
+                            <small>$0.015 per 1k chars</small>
+                        </span>
+                    </label>
+
+                    <label class="provider-option">
+                        <input type="radio" name="provider" value="elevenlabs" id="providerElevenLabs">
+                        <span class="provider-label">
+                            <strong>ElevenLabs</strong>
+                            <small>Free: 10k chars/month</small>
+                        </span>
+                    </label>
                 </div>
             </div>
 
@@ -54,7 +80,9 @@
                 </label>
 
                 <!-- Dropdown to select the voice for text-to-speech -->
+                <!-- Options will be updated dynamically based on selected provider -->
                 <select id="voiceSelect" class="voice-select">
+                    <!-- OpenAI voices (default) -->
                     <option value="shimmer" selected>Shimmer - Soft, warm, feminine</option>
                     <option value="alloy">Alloy - Neutral, calm, balanced</option>
                     <option value="nova">Nova - Friendly, gentle, feminine</option>
@@ -115,7 +143,7 @@
 
         <!-- Footer Section -->
         <footer>
-            <p>Using OpenAI's TTS API with multiple soothing voices</p>
+            <p>Choose between OpenAI and ElevenLabs TTS with multiple soothing voices</p>
             <p class="tip">💡 Tip: For best sleep experience, use headphones and set volume low</p>
         </footer>
     </div>

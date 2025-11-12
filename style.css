@@ -137,6 +137,82 @@ textarea::placeholder {
 }
 
 /* ============================
+   TTS PROVIDER SELECTION SECTION
+   ============================ */
+
+/* Container for TTS provider selection */
+.provider-section {
+    margin-bottom: 25px;
+}
+
+.section-label {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* Container for provider radio buttons */
+.provider-options {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Individual provider option (radio button + label) */
+.provider-option {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--accent-color);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect for provider options */
+.provider-option:hover {
+    border-color: var(--highlight-hover);
+    background-color: rgba(15, 52, 96, 0.8);
+}
+
+/* Style when provider is selected */
+.provider-option:has(input:checked) {
+    border-color: var(--highlight-color);
+    background-color: rgba(83, 52, 131, 0.2);
+}
+
+/* Hide the default radio button */
+.provider-option input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--highlight-color);
+}
+
+/* Provider label text styling */
+.provider-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.provider-label strong {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.provider-label small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* ============================
    VOICE SELECTION SECTION
    ============================ */
 

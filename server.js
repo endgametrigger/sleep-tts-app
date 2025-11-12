@@ -25,6 +25,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================
+// ELEVENLABS VOICE ID MAPPINGS
+// ============================
+
+// ElevenLabs uses unique voice IDs instead of simple names
+// These are the voice IDs for the most soothing/relaxing voices
+const elevenLabsVoiceIds = {
+  'rachel': '21m00Tcm4TlvDq8ikWAM',  // Calm, clear, American female
+  'domi': 'AZnzlk1XvdvUeBnXmlld',    // Confident, strong female
+  'bella': 'EXAVITQu4vr4xnSDxMaL',   // Soft, gentle, young female
+  'antoni': 'ErXwobaYiN019PkySvjV',  // Well-rounded, male
+  'arnold': 'VR6AewLTigWG4xSOukaG'   // Crisp, American male
+};
+
+// ============================
 // MIDDLEWARE SETUP
 // ============================
 
@@ -46,8 +60,8 @@ app.use(express.static('.'));
 // This is where our frontend will send text to be converted to speech
 app.post('/api/generate-speech', async (req, res) => {
   try {
-    // Extract the text and voice from the request body that was sent from the frontend
-    const { text, voice } = req.body;
+    // Extract the text, voice, and provider from the request body
+    const { text, voice, provider } = req.body;
 
     // Validation: Make sure text was actually provided
     if (!text) {
@@ -56,86 +70,173 @@ app.post('/api/generate-speech', async (req, res) => {
       });
     }
 
-    // Validation: Check if the text is too long (OpenAI has limits)
-    if (text.length > 4096) {
+    // Validation: Check if the text is too long (increased to 10,000 characters)
+    if (text.length > 10000) {
       return res.status(400).json({
-        error: 'Text is too long. Please keep it under 4096 characters.'
+        error: 'Text is too long. Please keep it under 10,000 characters.'
       });
     }
 
-    // Define the list of valid OpenAI TTS voices
-    // These are the three most soothing voices for relaxation
-    const validVoices = ['shimmer', 'alloy', 'nova'];
+    // Validation: Make sure provider is specified and valid
+    const validProviders = ['openai', 'elevenlabs'];
+    const selectedProvider = provider || 'openai'; // Default to OpenAI
 
-    // Get the voice from the request, or default to 'shimmer' if not provided
-    let selectedVoice = voice || 'shimmer';
-
-    // Validation: Make sure the voice is one of the allowed voices
-    // This prevents users from sending invalid voice names to OpenAI
-    if (!validVoices.includes(selectedVoice)) {
-      console.warn(`Invalid voice "${selectedVoice}" requested, defaulting to shimmer`);
-      selectedVoice = 'shimmer'; // Fall back to default voice
-    }
-
-    // Get the API key from environment variables (loaded from .env file)
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    // Check if API key exists
-    if (!apiKey) {
-      console.error('ERROR: OPENAI_API_KEY not found in .env file');
-      return res.status(500).json({
-        error: 'Server configuration error. API key is missing.'
+    if (!validProviders.includes(selectedProvider)) {
+      return res.status(400).json({
+        error: 'Invalid provider. Must be either "openai" or "elevenlabs".'
       });
     }
 
-    console.log(`Generating speech for ${text.length} characters using "${selectedVoice}" voice...`);
+    // Route to the appropriate TTS provider
+    if (selectedProvider === 'openai') {
+      // ============================
+      // OPENAI TTS PROCESSING
+      // ============================
 
-    // Make a request to OpenAI's Text-to-Speech API
-    const response = await axios.post(
-      'https://api.openai.com/v1/audio/speech', // OpenAI TTS endpoint
-      {
-        model: 'tts-1',           // Use tts-1 model (faster and cheaper than tts-1-hd)
-        input: text,               // The text to convert to speech
-        voice: selectedVoice,      // Use the voice selected by the user (shimmer, alloy, or nova)
-        response_format: 'mp3'     // Get audio back as MP3 file
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,  // Authenticate with OpenAI using API key
-          'Content-Type': 'application/json'     // Tell OpenAI we're sending JSON data
-        },
-        responseType: 'arraybuffer'  // Important: Get binary audio data, not text
+      // Define the list of valid OpenAI TTS voices
+      const validOpenAIVoices = ['shimmer', 'alloy', 'nova'];
+
+      // Get the voice from the request, or default to 'shimmer'
+      let selectedVoice = voice || 'shimmer';
+
+      // Validation: Make sure the voice is one of the allowed voices
+      if (!validOpenAIVoices.includes(selectedVoice)) {
+        console.warn(`Invalid OpenAI voice "${selectedVoice}" requested, defaulting to shimmer`);
+        selectedVoice = 'shimmer';
       }
-    );
 
-    // Calculate the cost (OpenAI charges $0.015 per 1,000 characters for tts-1)
-    const characterCount = text.length;
-    const estimatedCost = (characterCount / 1000) * 0.015;
-    console.log(`Speech generated successfully! Cost: $${estimatedCost.toFixed(4)}`);
+      // Get the OpenAI API key from environment variables
+      const apiKey = process.env.OPENAI_API_KEY;
 
-    // Convert the audio data to base64 format (easier to send to frontend)
-    const audioBase64 = Buffer.from(response.data).toString('base64');
+      if (!apiKey) {
+        console.error('ERROR: OPENAI_API_KEY not found in .env file');
+        return res.status(500).json({
+          error: 'OpenAI API key is missing. Please add OPENAI_API_KEY to your .env file.'
+        });
+      }
 
-    // Send the audio data back to the frontend as JSON
-    res.json({
-      success: true,
-      audio: audioBase64,           // The audio file in base64 format
-      characterCount: characterCount, // How many characters were processed
-      estimatedCost: estimatedCost   // Estimated cost for this request
-    });
+      console.log(`[OpenAI] Generating speech for ${text.length} characters using "${selectedVoice}" voice...`);
+
+      // Make a request to OpenAI's Text-to-Speech API
+      const response = await axios.post(
+        'https://api.openai.com/v1/audio/speech',
+        {
+          model: 'tts-1',           // Use tts-1 model (faster and cheaper)
+          input: text,               // The text to convert to speech
+          voice: selectedVoice,      // The voice selected by the user
+          response_format: 'mp3'     // Get audio back as MP3 file
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          responseType: 'arraybuffer'  // Get binary audio data
+        }
+      );
+
+      // Calculate the cost (OpenAI charges $0.015 per 1,000 characters)
+      const characterCount = text.length;
+      const estimatedCost = (characterCount / 1000) * 0.015;
+      console.log(`[OpenAI] Speech generated successfully! Cost: $${estimatedCost.toFixed(4)}`);
+
+      // Convert the audio data to base64 format
+      const audioBase64 = Buffer.from(response.data).toString('base64');
+
+      // Send the audio data back to the frontend
+      res.json({
+        success: true,
+        audio: audioBase64,
+        characterCount: characterCount,
+        estimatedCost: estimatedCost,
+        provider: 'openai'
+      });
+
+    } else if (selectedProvider === 'elevenlabs') {
+      // ============================
+      // ELEVENLABS TTS PROCESSING
+      // ============================
+
+      // Get the voice from the request, or default to 'rachel'
+      let selectedVoice = voice || 'rachel';
+
+      // Validation: Make sure the voice is one of the allowed ElevenLabs voices
+      const validElevenLabsVoices = Object.keys(elevenLabsVoiceIds);
+
+      if (!validElevenLabsVoices.includes(selectedVoice)) {
+        console.warn(`Invalid ElevenLabs voice "${selectedVoice}" requested, defaulting to rachel`);
+        selectedVoice = 'rachel';
+      }
+
+      // Get the voice ID from the mapping
+      const voiceId = elevenLabsVoiceIds[selectedVoice];
+
+      // Get the ElevenLabs API key from environment variables
+      const apiKey = process.env.ELEVENLABS_API_KEY;
+
+      if (!apiKey) {
+        console.error('ERROR: ELEVENLABS_API_KEY not found in .env file');
+        return res.status(500).json({
+          error: 'ElevenLabs API key is missing. Please add ELEVENLABS_API_KEY to your .env file.'
+        });
+      }
+
+      console.log(`[ElevenLabs] Generating speech for ${text.length} characters using "${selectedVoice}" voice (ID: ${voiceId})...`);
+
+      // Make a request to ElevenLabs Text-to-Speech API
+      // Note: ElevenLabs API is different from OpenAI - voice ID goes in the URL
+      const response = await axios.post(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        {
+          text: text,                           // The text to convert to speech
+          model_id: 'eleven_monolingual_v1',   // Use the standard English model
+          voice_settings: {
+            stability: 0.5,                     // Voice consistency (0-1)
+            similarity_boost: 0.75              // Voice clarity (0-1)
+          }
+        },
+        {
+          headers: {
+            'xi-api-key': apiKey,               // ElevenLabs uses 'xi-api-key' header
+            'Content-Type': 'application/json'
+          },
+          responseType: 'arraybuffer'           // Get binary audio data
+        }
+      );
+
+      const characterCount = text.length;
+      console.log(`[ElevenLabs] Speech generated successfully! Characters used: ${characterCount}`);
+
+      // Convert the audio data to base64 format
+      const audioBase64 = Buffer.from(response.data).toString('base64');
+
+      // Send the audio data back to the frontend
+      // Note: ElevenLabs free tier has 10,000 chars/month
+      res.json({
+        success: true,
+        audio: audioBase64,
+        characterCount: characterCount,
+        estimatedCost: 0,  // Free tier
+        provider: 'elevenlabs'
+      });
+    }
 
   } catch (error) {
     // Error handling: If something goes wrong, log it and send error message to frontend
     console.error('Error generating speech:', error.response?.data || error.message);
 
-    // Check if it's an OpenAI API error
+    // Check for API-specific errors
     if (error.response?.status === 401) {
       return res.status(401).json({
-        error: 'Invalid API key. Please check your OPENAI_API_KEY in .env file.'
+        error: 'Invalid API key. Please check your API key in the .env file.'
       });
     } else if (error.response?.status === 429) {
       return res.status(429).json({
         error: 'Rate limit exceeded. Please wait a moment and try again.'
+      });
+    } else if (error.response?.status === 403) {
+      return res.status(403).json({
+        error: 'Access forbidden. Check your API key permissions or subscription status.'
       });
     } else {
       return res.status(500).json({
@@ -167,7 +268,8 @@ app.listen(PORT, () => {
   console.log('====================================');
   console.log(`🌙 Sleep TTS App is running!`);
   console.log(`📡 Server: http://localhost:${PORT}`);
-  console.log(`🔑 API Key loaded: ${process.env.OPENAI_API_KEY ? 'Yes ✓' : 'No ✗'}`);
+  console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
+  console.log(`🔑 ElevenLabs API Key: ${process.env.ELEVENLABS_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
   console.log('====================================');
   console.log('Open your browser and go to http://localhost:3000');
   console.log('Press Ctrl+C to stop the server');

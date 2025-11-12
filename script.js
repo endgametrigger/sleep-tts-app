@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get all the elements we need to interact with from the HTML
     const textInput = document.getElementById('textInput');           // The textarea where user types
+    const providerOpenAI = document.getElementById('providerOpenAI'); // OpenAI provider radio button
+    const providerElevenLabs = document.getElementById('providerElevenLabs'); // ElevenLabs provider radio button
     const voiceSelect = document.getElementById('voiceSelect');       // The voice selection dropdown
     const generateBtn = document.getElementById('generateBtn');       // The "Generate Audio" button
     const btnText = document.getElementById('btnText');               // The text inside the button
@@ -26,17 +28,75 @@ document.addEventListener('DOMContentLoaded', function() {
     const actualCost = document.getElementById('actualCost');         // Actual cost after generation
 
     // ============================
+    // VOICE OPTIONS FOR EACH PROVIDER
+    // ============================
+
+    // Define available voices for OpenAI TTS
+    const openAIVoices = [
+        { value: 'shimmer', label: 'Shimmer - Soft, warm, feminine' },
+        { value: 'alloy', label: 'Alloy - Neutral, calm, balanced' },
+        { value: 'nova', label: 'Nova - Friendly, gentle, feminine' }
+    ];
+
+    // Define available voices for ElevenLabs TTS
+    const elevenLabsVoices = [
+        { value: 'rachel', label: 'Rachel - Calm, clear, American female' },
+        { value: 'domi', label: 'Domi - Confident, strong female' },
+        { value: 'bella', label: 'Bella - Soft, gentle, young female' },
+        { value: 'antoni', label: 'Antoni - Well-rounded, male' },
+        { value: 'arnold', label: 'Arnold - Crisp, American male' }
+    ];
+
+    // ============================
     // EVENT LISTENERS
     // ============================
 
     // Update character count and estimated cost as user types
     textInput.addEventListener('input', updateCharacterCount);
 
+    // When user switches between OpenAI and ElevenLabs
+    providerOpenAI.addEventListener('change', updateVoiceOptions);
+    providerElevenLabs.addEventListener('change', updateVoiceOptions);
+
     // When user clicks the "Generate Audio" button
     generateBtn.addEventListener('click', generateSpeech);
 
     // When user moves the speed slider
     speedSlider.addEventListener('input', updatePlaybackSpeed);
+
+    // ============================
+    // FUNCTION: UPDATE VOICE OPTIONS
+    // ============================
+
+    /**
+     * Updates the voice dropdown based on selected TTS provider
+     * Called when user switches between OpenAI and ElevenLabs
+     */
+    function updateVoiceOptions() {
+        // Clear existing voice options
+        voiceSelect.innerHTML = '';
+
+        // Determine which provider is selected
+        const isOpenAI = providerOpenAI.checked;
+        const voices = isOpenAI ? openAIVoices : elevenLabsVoices;
+
+        // Populate voice dropdown with appropriate voices
+        voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = voice.value;
+            option.textContent = voice.label;
+            // Select the first voice by default
+            if (index === 0) {
+                option.selected = true;
+            }
+            voiceSelect.appendChild(option);
+        });
+
+        // Update cost estimate when provider changes
+        updateCharacterCount();
+
+        console.log(`Switched to ${isOpenAI ? 'OpenAI' : 'ElevenLabs'} provider`);
+    }
 
     // ============================
     // FUNCTION: UPDATE CHARACTER COUNT
@@ -50,18 +110,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the current length of text in the textarea
         const length = textInput.value.length;
 
-        // Update the character count display (e.g., "245 / 4096 characters")
-        charCount.textContent = `${length} / 4096 characters`;
+        // Update the character count display (e.g., "245 / 10,000 characters")
+        charCount.textContent = `${length} / 10,000 characters`;
 
-        // Calculate estimated cost
-        // OpenAI charges $0.015 per 1,000 characters for tts-1 model
-        const cost = (length / 1000) * 0.015;
+        // Calculate estimated cost based on selected provider
+        const isOpenAI = providerOpenAI.checked;
 
-        // Update the estimated cost display (e.g., "Estimated cost: $0.01")
-        estimatedCost.textContent = `Estimated cost: $${cost.toFixed(4)}`;
+        if (isOpenAI) {
+            // OpenAI charges $0.015 per 1,000 characters for tts-1 model
+            const cost = (length / 1000) * 0.015;
+            estimatedCost.textContent = `Estimated cost: $${cost.toFixed(4)}`;
+        } else {
+            // ElevenLabs has a free tier with 10,000 characters per month
+            if (length <= 10000) {
+                estimatedCost.textContent = `Free tier: ${length} / 10,000 chars used`;
+            } else {
+                estimatedCost.textContent = `Exceeds free tier (10,000 chars)`;
+            }
+        }
 
         // Change color based on text length
-        if (length > 3500) {
+        if (length > 9000) {
             // Turn orange when getting close to the limit
             charCount.style.color = '#ff9f43';
         } else {
@@ -82,8 +151,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the text from the textarea
         const text = textInput.value.trim(); // trim() removes extra spaces at start/end
 
+        // Get the selected provider (OpenAI or ElevenLabs)
+        const selectedProvider = providerOpenAI.checked ? 'openai' : 'elevenlabs';
+
         // Get the selected voice from the dropdown
-        // This will be one of: 'shimmer', 'alloy', or 'nova'
         const selectedVoice = voiceSelect.value;
 
         // Validation: Check if text is empty
@@ -92,9 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return; // Stop here if there's no text
         }
 
-        // Validation: Check if text is too long
-        if (text.length > 4096) {
-            showError('Text is too long. Please keep it under 4096 characters.');
+        // Validation: Check if text is too long (increased to 10,000 characters)
+        if (text.length > 10000) {
+            showError('Text is too long. Please keep it under 10,000 characters.');
             return; // Stop here if text is too long
         }
 
@@ -107,8 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update UI to show loading state
         setLoadingState(true);
 
-        // Log which voice we're using (helpful for debugging)
-        console.log(`Generating speech with voice: ${selectedVoice}`);
+        // Log which provider and voice we're using (helpful for debugging)
+        console.log(`Generating speech with ${selectedProvider} using voice: ${selectedVoice}`);
 
         try {
             // Make a POST request to our backend server
@@ -118,10 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json'  // Tell server we're sending JSON
                 },
-                // Send both the text and the selected voice to the backend
+                // Send the text, voice, and provider to the backend
                 body: JSON.stringify({
-                    text: text,              // The text to convert to speech
-                    voice: selectedVoice     // The voice to use (shimmer, alloy, or nova)
+                    text: text,                  // The text to convert to speech
+                    voice: selectedVoice,        // The voice to use
+                    provider: selectedProvider   // The TTS provider (openai or elevenlabs)
                 })
             });
 

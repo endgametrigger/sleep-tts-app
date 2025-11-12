@@ -4,11 +4,12 @@ A simple, beginner-friendly text-to-speech web application using OpenAI's TTS AP
 
 ## Features
 
+- **Dual TTS Provider Support** - Choose between OpenAI and ElevenLabs for text-to-speech
+- **Multiple Soothing Voices** - 3 OpenAI voices + 5 ElevenLabs voices optimized for relaxation
 - **Clean, Minimalist Interface** - Calming dark blue/purple color scheme designed for relaxation
-- **OpenAI TTS Integration** - Uses the soothing "Shimmer" voice with the fast, cost-effective "tts-1" model
 - **Adjustable Playback Speed** - Control speed from 0.75x (slower) to 1.25x (faster)
-- **Real-time Cost Estimation** - See estimated cost before generating audio ($0.015 per 1,000 characters)
-- **Character Counter** - Know exactly how much text you're converting (max 4,096 characters)
+- **Real-time Cost Estimation** - See estimated cost before generating audio
+- **Extended Character Limit** - Convert up to 10,000 characters at once
 - **Mobile Responsive** - Works great on phones, tablets, and desktops
 - **Beginner-Friendly Code** - Extensively commented code to help you learn
 
@@ -27,9 +28,18 @@ Before you begin, make sure you have:
    - Download from: https://nodejs.org/
    - Check if installed: `node --version`
 
-2. **OpenAI API Key**
+2. **API Keys** (you can choose one or both providers):
+
+   **OpenAI API Key** (Optional)
    - Get one at: https://platform.openai.com/api-keys
    - Make sure you have credits in your OpenAI account
+   - Cost: $0.015 per 1,000 characters
+
+   **ElevenLabs API Key** (Optional)
+   - Get one at: https://elevenlabs.io/
+   - Sign up for a free account
+   - Free tier: 10,000 characters per month
+   - Go to your profile settings to find your API key
 
 ## Setup Instructions
 
@@ -47,13 +57,21 @@ This will install:
 - `cors` - Allows frontend to communicate with backend
 - `axios` - For making HTTP requests to OpenAI API
 
-### Step 2: Configure Your API Key
+### Step 2: Configure Your API Keys
 
-Your `.env` file should already contain your OpenAI API key. If not, create a `.env` file in the project root and add:
+You need at least one API key to use the app. You can use OpenAI, ElevenLabs, or both.
+
+Create a `.env` file in the project root (if it doesn't exist) and add your API keys:
 
 ```
-OPENAI_API_KEY=your-api-key-here
+# OpenAI API Key (required for OpenAI TTS)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# ElevenLabs API Key (required for ElevenLabs TTS)
+ELEVENLABS_API_KEY=your-elevenlabs-api-key-here
 ```
+
+**Note:** You can use one or both services. If you only want to use OpenAI, just add the OpenAI key. If you only want to use ElevenLabs (free tier), just add the ElevenLabs key.
 
 **IMPORTANT:** Never commit your `.env` file to version control! It's already in `.gitignore` for safety.
 
@@ -70,7 +88,8 @@ You should see:
 ====================================
 🌙 Sleep TTS App is running!
 📡 Server: http://localhost:3000
-🔑 API Key loaded: Yes ✓
+🔑 OpenAI API Key: Loaded ✓
+🔑 ElevenLabs API Key: Loaded ✓
 ====================================
 Open your browser and go to http://localhost:3000
 Press Ctrl+C to stop the server
@@ -89,25 +108,52 @@ You should see the Sleep TTS App interface!
 
 ## How to Use
 
-1. **Paste Your Text** - Copy any text you want to listen to (stories, articles, meditation scripts) and paste it into the textarea
+1. **Paste Your Text** - Copy any text you want to listen to (stories, articles, meditation scripts) and paste it into the textarea (up to 10,000 characters)
 
-2. **Check the Cost** - The app will show you the estimated cost in real-time as you type
+2. **Choose Your TTS Provider** - Select between OpenAI or ElevenLabs
 
-3. **Generate Audio** - Click the "Generate Audio" button and wait a few seconds
+3. **Select a Voice** - Pick from the available voices for your chosen provider
 
-4. **Listen & Relax** - Use the audio player controls to play, pause, and adjust the speed
+4. **Check the Cost** - The app will show you the estimated cost in real-time as you type
 
-5. **Adjust Speed** - Use the slider to slow down (0.75x) or speed up (1.25x) the playback
+5. **Generate Audio** - Click the "Generate Audio" button and wait a few seconds
+
+6. **Listen & Relax** - Use the audio player controls to play, pause, and adjust the speed
+
+7. **Adjust Speed** - Use the slider to slow down (0.75x) or speed up (1.25x) the playback
+
+## Available Voices
+
+### OpenAI Voices
+- **Shimmer** - Soft, warm, feminine
+- **Alloy** - Neutral, calm, balanced
+- **Nova** - Friendly, gentle, feminine
+
+### ElevenLabs Voices
+- **Rachel** - Calm, clear, American female
+- **Domi** - Confident, strong female
+- **Bella** - Soft, gentle, young female
+- **Antoni** - Well-rounded, male
+- **Arnold** - Crisp, American male
 
 ## Cost Breakdown
 
+### OpenAI Pricing
 OpenAI charges **$0.015 per 1,000 characters** for the `tts-1` model:
 
 - 100 characters: $0.0015 (less than a penny)
 - 1,000 characters: $0.015 (1.5 cents)
-- 4,000 characters: $0.06 (6 cents)
+- 10,000 characters: $0.15 (15 cents)
 
 **Example:** A typical bedtime story (2,000 characters) costs about $0.03 (3 cents)
+
+### ElevenLabs Pricing
+ElevenLabs offers a **free tier** with generous limits:
+
+- **Free Tier:** 10,000 characters per month (FREE)
+- **Paid Plans:** Available for higher usage starting at $5/month
+
+**Recommendation:** Start with ElevenLabs free tier for testing, then use OpenAI for higher volume needs.
 
 ## File Structure
 
@@ -126,12 +172,14 @@ sleep-tts-app/
 ## Troubleshooting
 
 ### "API key is missing" error
-- Make sure your `.env` file exists and contains `OPENAI_API_KEY=your-key`
-- Restart the server after adding the API key
+- Make sure your `.env` file exists in the project root
+- Add the appropriate API key: `OPENAI_API_KEY` or `ELEVENLABS_API_KEY`
+- Restart the server after adding API keys
 
 ### "Invalid API key" error
-- Check that your API key is correct
-- Make sure your OpenAI account has credits
+- Check that your API key is copied correctly (no extra spaces)
+- For OpenAI: Make sure your account has credits
+- For ElevenLabs: Verify your account is active and the key is from your profile settings
 
 ### "Rate limit exceeded" error
 - You've made too many requests too quickly
@@ -180,12 +228,14 @@ Every file is heavily commented to explain what each section does!
 ## Future Enhancements
 
 Ideas for improving this app:
-- Add multiple voice options (alloy, echo, fable, onyx, nova, shimmer)
+- Add more TTS providers (Google Cloud TTS, Amazon Polly)
 - Save generated audio files for offline listening
 - Add a history of previously generated audio
-- Support for longer texts by splitting into chunks
+- Support for even longer texts by splitting into chunks
 - Dark/light mode toggle
 - Download button for generated audio
+- Voice preview samples
+- Bookmark favorite voice/provider combinations
 
 ## Support
 
