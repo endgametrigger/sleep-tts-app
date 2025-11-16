@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const processedChars = document.getElementById('processedChars'); // Chars processed after generation
     const actualCost = document.getElementById('actualCost');         // Actual cost after generation
 
+    // ElevenLabs Creator Plan advanced settings elements
+    const elevenLabsSettings = document.getElementById('elevenLabsSettings'); // Advanced settings container
+    const stabilitySlider = document.getElementById('stabilitySlider');       // Voice consistency slider
+    const stabilityValue = document.getElementById('stabilityValue');         // Voice consistency value display
+    const similaritySlider = document.getElementById('similaritySlider');     // Voice clarity slider
+    const similarityValue = document.getElementById('similarityValue');       // Voice clarity value display
+    const styleSlider = document.getElementById('styleSlider');               // Expressiveness slider
+    const styleValue = document.getElementById('styleValue');                 // Expressiveness value display
+
     // ============================
     // VOICE OPTIONS FOR EACH PROVIDER
     // ============================
@@ -38,12 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
         { value: 'nova', label: 'Nova - Friendly, gentle, feminine' }
     ];
 
-    // Define available voices for ElevenLabs TTS
+    // Define available voices for ElevenLabs TTS (Creator Plan)
     const elevenLabsVoices = [
         { value: 'rachel', label: 'Rachel - Calm, clear, American female' },
         { value: 'domi', label: 'Domi - Confident, strong female' },
         { value: 'bella', label: 'Bella - Soft, gentle, young female' },
+        { value: 'lily', label: 'Lily - British, gentle female' },
+        { value: 'charlotte', label: 'Charlotte - Swedish, calm female' },
         { value: 'antoni', label: 'Antoni - Well-rounded, male' },
+        { value: 'callum', label: 'Callum - British, smooth male' },
         { value: 'arnold', label: 'Arnold - Crisp, American male' }
     ];
 
@@ -63,6 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // When user moves the speed slider
     speedSlider.addEventListener('input', updatePlaybackSpeed);
+
+    // When user adjusts ElevenLabs advanced settings sliders
+    stabilitySlider.addEventListener('input', updateStabilityValue);
+    similaritySlider.addEventListener('input', updateSimilarityValue);
+    styleSlider.addEventListener('input', updateStyleValue);
 
     // ============================
     // FUNCTION: UPDATE VOICE OPTIONS
@@ -92,6 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
             voiceSelect.appendChild(option);
         });
 
+        // Show/hide ElevenLabs advanced settings based on provider
+        if (isOpenAI) {
+            // Hide advanced settings for OpenAI (they don't have these options)
+            elevenLabsSettings.style.display = 'none';
+        } else {
+            // Show advanced settings for ElevenLabs Creator plan
+            elevenLabsSettings.style.display = 'block';
+        }
+
         // Update cost estimate when provider changes
         updateCharacterCount();
 
@@ -110,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the current length of text in the textarea
         const length = textInput.value.length;
 
-        // Update the character count display (e.g., "245 / 10,000 characters")
-        charCount.textContent = `${length} / 10,000 characters`;
+        // Update the character count display (e.g., "245 / 25,000 characters")
+        charCount.textContent = `${length} / 25,000 characters`;
 
         // Calculate estimated cost based on selected provider
         const isOpenAI = providerOpenAI.checked;
@@ -121,17 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const cost = (length / 1000) * 0.015;
             estimatedCost.textContent = `Estimated cost: $${cost.toFixed(4)}`;
         } else {
-            // ElevenLabs has a free tier with 10,000 characters per month
-            if (length <= 10000) {
-                estimatedCost.textContent = `Free tier: ${length} / 10,000 chars used`;
-            } else {
-                estimatedCost.textContent = `Exceeds free tier (10,000 chars)`;
-            }
+            // ElevenLabs Creator Plan: 100,000 characters per month
+            estimatedCost.textContent = `Creator Plan: ${length} / 100,000 chars/month`;
         }
 
         // Change color based on text length
-        if (length > 9000) {
-            // Turn orange when getting close to the limit
+        if (length > 23000) {
+            // Turn orange when getting close to the limit (25,000)
             charCount.style.color = '#ff9f43';
         } else {
             // Keep it normal color
@@ -163,9 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return; // Stop here if there's no text
         }
 
-        // Validation: Check if text is too long (increased to 10,000 characters)
-        if (text.length > 10000) {
-            showError('Text is too long. Please keep it under 10,000 characters.');
+        // Validation: Check if text is too long (increased to 25,000 characters)
+        if (text.length > 25000) {
+            showError('Text is too long. Please keep it under 25,000 characters.');
             return; // Stop here if text is too long
         }
 
@@ -178,6 +200,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update UI to show loading state
         setLoadingState(true);
 
+        // Build the request body
+        const requestBody = {
+            text: text,                  // The text to convert to speech
+            voice: selectedVoice,        // The voice to use
+            provider: selectedProvider   // The TTS provider (openai or elevenlabs)
+        };
+
+        // If using ElevenLabs, include advanced settings from sliders
+        if (selectedProvider === 'elevenlabs') {
+            requestBody.stability = parseFloat(stabilitySlider.value);
+            requestBody.similarity_boost = parseFloat(similaritySlider.value);
+            requestBody.style = parseFloat(styleSlider.value);
+
+            console.log(`ElevenLabs settings - Stability: ${requestBody.stability}, Similarity: ${requestBody.similarity_boost}, Style: ${requestBody.style}`);
+        }
+
         // Log which provider and voice we're using (helpful for debugging)
         console.log(`Generating speech with ${selectedProvider} using voice: ${selectedVoice}`);
 
@@ -189,12 +227,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json'  // Tell server we're sending JSON
                 },
-                // Send the text, voice, and provider to the backend
-                body: JSON.stringify({
-                    text: text,                  // The text to convert to speech
-                    voice: selectedVoice,        // The voice to use
-                    provider: selectedProvider   // The TTS provider (openai or elevenlabs)
-                })
+                // Send the request body (includes text, voice, provider, and ElevenLabs settings if applicable)
+                body: JSON.stringify(requestBody)
             });
 
             // Parse the JSON response from the server
@@ -314,6 +348,37 @@ document.addEventListener('DOMContentLoaded', function() {
         // Change the actual playback speed of the audio
         // playbackRate controls how fast or slow the audio plays
         audioPlayer.playbackRate = speed;
+    }
+
+    // ============================
+    // FUNCTIONS: UPDATE ELEVENLABS SETTINGS VALUES
+    // ============================
+
+    /**
+     * Updates the stability slider value display
+     * Stability controls voice consistency (higher = more consistent)
+     */
+    function updateStabilityValue() {
+        const value = parseFloat(stabilitySlider.value);
+        stabilityValue.textContent = value.toFixed(2);
+    }
+
+    /**
+     * Updates the similarity boost slider value display
+     * Similarity controls how close the voice stays to the original
+     */
+    function updateSimilarityValue() {
+        const value = parseFloat(similaritySlider.value);
+        similarityValue.textContent = value.toFixed(2);
+    }
+
+    /**
+     * Updates the style slider value display
+     * Style controls expressiveness/emotion (keep low for sleep content)
+     */
+    function updateStyleValue() {
+        const value = parseFloat(styleSlider.value);
+        styleValue.textContent = value.toFixed(2);
     }
 
     // ============================

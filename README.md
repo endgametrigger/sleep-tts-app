@@ -5,11 +5,13 @@ A simple, beginner-friendly text-to-speech web application using OpenAI's TTS AP
 ## Features
 
 - **Dual TTS Provider Support** - Choose between OpenAI and ElevenLabs for text-to-speech
-- **Multiple Soothing Voices** - 3 OpenAI voices + 5 ElevenLabs voices optimized for relaxation
+- **Multiple Premium Voices** - 3 OpenAI voices + 8 ElevenLabs Creator voices optimized for relaxation
+- **ElevenLabs Creator Plan Integration** - Advanced voice controls with adjustable settings
+- **Voice Customization Sliders** - Fine-tune stability, clarity, and expressiveness (ElevenLabs only)
 - **Clean, Minimalist Interface** - Calming dark blue/purple color scheme designed for relaxation
 - **Adjustable Playback Speed** - Control speed from 0.75x (slower) to 1.25x (faster)
 - **Real-time Cost Estimation** - See estimated cost before generating audio
-- **Extended Character Limit** - Convert up to 10,000 characters at once
+- **Extended Character Limit** - Convert up to 25,000 characters at once
 - **Mobile Responsive** - Works great on phones, tablets, and desktops
 - **Beginner-Friendly Code** - Extensively commented code to help you learn
 
@@ -37,8 +39,8 @@ Before you begin, make sure you have:
 
    **ElevenLabs API Key** (Optional)
    - Get one at: https://elevenlabs.io/
-   - Sign up for a free account
-   - Free tier: 10,000 characters per month
+   - Creator Plan recommended: 100,000 characters per month ($11/month)
+   - Access to premium voices and advanced voice settings
    - Go to your profile settings to find your API key
 
 ## Setup Instructions
@@ -108,19 +110,24 @@ You should see the Sleep TTS App interface!
 
 ## How to Use
 
-1. **Paste Your Text** - Copy any text you want to listen to (stories, articles, meditation scripts) and paste it into the textarea (up to 10,000 characters)
+1. **Paste Your Text** - Copy any text you want to listen to (stories, articles, meditation scripts) and paste it into the textarea (up to 25,000 characters)
 
 2. **Choose Your TTS Provider** - Select between OpenAI or ElevenLabs
 
 3. **Select a Voice** - Pick from the available voices for your chosen provider
 
-4. **Check the Cost** - The app will show you the estimated cost in real-time as you type
+4. **Adjust Voice Settings** (ElevenLabs Creator only):
+   - **Voice Consistency** - Control how stable the voice sounds (higher = more consistent)
+   - **Voice Clarity** - Control how close to the original voice (higher = clearer)
+   - **Expressiveness** - Control emotional variation (keep low for sleep content)
 
-5. **Generate Audio** - Click the "Generate Audio" button and wait a few seconds
+5. **Check the Cost** - The app will show you the estimated cost in real-time as you type
 
-6. **Listen & Relax** - Use the audio player controls to play, pause, and adjust the speed
+6. **Generate Audio** - Click the "Generate Audio" button and wait a few seconds
 
-7. **Adjust Speed** - Use the slider to slow down (0.75x) or speed up (1.25x) the playback
+7. **Listen & Relax** - Use the audio player controls to play, pause, and adjust the speed
+
+8. **Adjust Speed** - Use the slider to slow down (0.75x) or speed up (1.25x) the playback
 
 ## Available Voices
 
@@ -129,12 +136,20 @@ You should see the Sleep TTS App interface!
 - **Alloy** - Neutral, calm, balanced
 - **Nova** - Friendly, gentle, feminine
 
-### ElevenLabs Voices
+### ElevenLabs Voices (Creator Plan)
 - **Rachel** - Calm, clear, American female
 - **Domi** - Confident, strong female
 - **Bella** - Soft, gentle, young female
+- **Lily** - British, gentle female (NEW)
+- **Charlotte** - Swedish, calm female (NEW)
 - **Antoni** - Well-rounded, male
+- **Callum** - British, smooth male (NEW)
 - **Arnold** - Crisp, American male
+
+**Advanced Settings** (ElevenLabs only):
+- Adjust voice consistency, clarity, and expressiveness with easy sliders
+- Defaults optimized for sleep and relaxation content
+- Fine-tune to your personal preference
 
 ## Cost Breakdown
 
@@ -143,17 +158,19 @@ OpenAI charges **$0.015 per 1,000 characters** for the `tts-1` model:
 
 - 100 characters: $0.0015 (less than a penny)
 - 1,000 characters: $0.015 (1.5 cents)
-- 10,000 characters: $0.15 (15 cents)
+- 25,000 characters: $0.375 (38 cents)
 
 **Example:** A typical bedtime story (2,000 characters) costs about $0.03 (3 cents)
 
-### ElevenLabs Pricing
-ElevenLabs offers a **free tier** with generous limits:
+### ElevenLabs Pricing (Creator Plan)
+ElevenLabs Creator Plan offers excellent value:
 
-- **Free Tier:** 10,000 characters per month (FREE)
-- **Paid Plans:** Available for higher usage starting at $5/month
+- **Creator Plan:** $11/month for 100,000 characters
+- **Includes:** Access to premium voices and advanced voice settings
+- **Cost per use:** Effectively free within your monthly limit
+- **Example:** 100 bedtime stories (2,000 chars each) = $11/month total
 
-**Recommendation:** Start with ElevenLabs free tier for testing, then use OpenAI for higher volume needs.
+**Recommendation:** Use ElevenLabs Creator Plan for the best value and voice quality with advanced customization options.
 
 ## File Structure
 

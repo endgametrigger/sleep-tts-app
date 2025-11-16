@@ -268,6 +268,110 @@ textarea::placeholder {
 }
 
 /* ============================
+   ELEVENLABS ADVANCED SETTINGS
+   ============================ */
+
+/* Container for ElevenLabs Creator plan advanced settings */
+.elevenlabs-settings {
+    background-color: rgba(83, 52, 131, 0.1);
+    border: 2px solid var(--highlight-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.elevenlabs-settings .section-label {
+    color: var(--highlight-hover);
+    margin-bottom: 15px;
+}
+
+/* Individual setting control (slider + label) */
+.setting-control {
+    margin-bottom: 20px;
+}
+
+.setting-control:last-child {
+    margin-bottom: 0;
+}
+
+/* Setting header with label and value */
+.setting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.setting-header label {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.setting-header span {
+    color: var(--highlight-color);
+    font-weight: 700;
+}
+
+/* Help text explaining what the setting does */
+.setting-help {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    width: 100%;
+    margin-top: 4px;
+    font-weight: 400 !important;
+}
+
+/* Slider styling for ElevenLabs settings */
+.setting-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: var(--secondary-bg);
+    outline: none;
+    transition: background 0.3s ease;
+}
+
+/* Slider track when hovering */
+.setting-slider:hover {
+    background: rgba(83, 52, 131, 0.3);
+}
+
+/* Slider thumb (the draggable part) for Webkit browsers */
+.setting-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--highlight-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.setting-slider::-webkit-slider-thumb:hover {
+    background: var(--highlight-hover);
+    transform: scale(1.1);
+}
+
+/* Slider thumb for Firefox */
+.setting-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--highlight-color);
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.setting-slider::-moz-range-thumb:hover {
+    background: var(--highlight-hover);
+    transform: scale(1.1);
+}
+
+/* ============================
    BUTTON SECTION
    ============================ */
 

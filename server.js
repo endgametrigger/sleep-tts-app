@@ -25,16 +25,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================
-// ELEVENLABS VOICE ID MAPPINGS
+// ELEVENLABS VOICE ID MAPPINGS (CREATOR PLAN)
 // ============================
 
 // ElevenLabs uses unique voice IDs instead of simple names
 // These are the voice IDs for the most soothing/relaxing voices
+// Creator Plan includes access to more premium voices
 const elevenLabsVoiceIds = {
   'rachel': '21m00Tcm4TlvDq8ikWAM',  // Calm, clear, American female
   'domi': 'AZnzlk1XvdvUeBnXmlld',    // Confident, strong female
   'bella': 'EXAVITQu4vr4xnSDxMaL',   // Soft, gentle, young female
+  'lily': 'pFZP5JQG7iQjIQuC4Bku',    // British, gentle female
+  'charlotte': 'XB0fDUnXU5powFXDhCwa', // Swedish, calm female
   'antoni': 'ErXwobaYiN019PkySvjV',  // Well-rounded, male
+  'callum': 'N2lVS1w4EtoT3dr4eOWO',  // British, smooth male
   'arnold': 'VR6AewLTigWG4xSOukaG'   // Crisp, American male
 };
 
@@ -70,10 +74,10 @@ app.post('/api/generate-speech', async (req, res) => {
       });
     }
 
-    // Validation: Check if the text is too long (increased to 10,000 characters)
-    if (text.length > 10000) {
+    // Validation: Check if the text is too long (increased to 25,000 characters for Creator plan)
+    if (text.length > 25000) {
       return res.status(400).json({
-        error: 'Text is too long. Please keep it under 10,000 characters.'
+        error: 'Text is too long. Please keep it under 25,000 characters.'
       });
     }
 
@@ -154,7 +158,7 @@ app.post('/api/generate-speech', async (req, res) => {
 
     } else if (selectedProvider === 'elevenlabs') {
       // ============================
-      // ELEVENLABS TTS PROCESSING
+      // ELEVENLABS TTS PROCESSING (CREATOR PLAN)
       // ============================
 
       // Get the voice from the request, or default to 'rachel'
@@ -181,7 +185,19 @@ app.post('/api/generate-speech', async (req, res) => {
         });
       }
 
-      console.log(`[ElevenLabs] Generating speech for ${text.length} characters using "${selectedVoice}" voice (ID: ${voiceId})...`);
+      // Extract advanced voice settings from request (Creator Plan features)
+      // These settings control the quality and style of the generated voice
+      const { stability, similarity_boost, style } = req.body;
+
+      // Use provided values or sensible defaults for sleep/relaxation content
+      const voiceSettings = {
+        stability: stability !== undefined ? stability : 0.5,           // Voice consistency (0-1)
+        similarity_boost: similarity_boost !== undefined ? similarity_boost : 0.75, // Voice clarity (0-1)
+        style: style !== undefined ? style : 0.0                        // Expressiveness (0-1, keep low for sleep)
+      };
+
+      console.log(`[ElevenLabs Creator] Generating speech for ${text.length} characters using "${selectedVoice}" voice (ID: ${voiceId})...`);
+      console.log(`[ElevenLabs Creator] Settings - Stability: ${voiceSettings.stability}, Similarity: ${voiceSettings.similarity_boost}, Style: ${voiceSettings.style}`);
 
       // Make a request to ElevenLabs Text-to-Speech API
       // Note: ElevenLabs API is different from OpenAI - voice ID goes in the URL
@@ -190,10 +206,7 @@ app.post('/api/generate-speech', async (req, res) => {
         {
           text: text,                           // The text to convert to speech
           model_id: 'eleven_monolingual_v1',   // Use the standard English model
-          voice_settings: {
-            stability: 0.5,                     // Voice consistency (0-1)
-            similarity_boost: 0.75              // Voice clarity (0-1)
-          }
+          voice_settings: voiceSettings         // Use the advanced settings from the frontend
         },
         {
           headers: {
@@ -205,18 +218,18 @@ app.post('/api/generate-speech', async (req, res) => {
       );
 
       const characterCount = text.length;
-      console.log(`[ElevenLabs] Speech generated successfully! Characters used: ${characterCount}`);
+      console.log(`[ElevenLabs Creator] Speech generated successfully! Characters used: ${characterCount} / 100,000 monthly limit`);
 
       // Convert the audio data to base64 format
       const audioBase64 = Buffer.from(response.data).toString('base64');
 
       // Send the audio data back to the frontend
-      // Note: ElevenLabs free tier has 10,000 chars/month
+      // Note: Creator Plan has 100,000 chars/month
       res.json({
         success: true,
         audio: audioBase64,
         characterCount: characterCount,
-        estimatedCost: 0,  // Free tier
+        estimatedCost: 0,  // Creator Plan (included in subscription)
         provider: 'elevenlabs'
       });
     }
