@@ -154,6 +154,26 @@
                     <!-- Loading spinner (hidden by default, shown when generating) -->
                     <span id="spinner" class="spinner" style="display: none;"></span>
                 </button>
+
+                <button id="addToPlaylistBtn" class="generate-btn playlist-btn">
+                    <span id="playlistBtnText">Add to Playlist</span>
+                    <span id="playlistSpinner" class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+
+            <!-- Playlist Entry Name (optional) -->
+            <div class="playlist-name-section">
+                <label for="playlistEntryName">
+                    Playlist Entry Name (optional):
+                </label>
+                <input
+                    type="text"
+                    id="playlistEntryName"
+                    class="playlist-name-input"
+                    placeholder="e.g., Chapter 1, Part 2, Meditation..."
+                    maxlength="50"
+                >
+                <small class="help-text">Leave blank to auto-generate names (Track 1, Track 2, etc.)</small>
             </div>
 
             <!-- Error Message Display (hidden by default) -->
@@ -195,6 +215,42 @@
                     <p>
                         <strong>Estimated cost:</strong> $<span id="actualCost">0.00</span>
                     </p>
+                </div>
+            </div>
+
+            <!-- Playlist Section -->
+            <div id="playlistSection" class="playlist-section" style="display: none;">
+                <h3>Playlist Queue</h3>
+
+                <!-- Playlist Progress -->
+                <div id="playlistProgress" class="playlist-progress" style="display: none;">
+                    <p class="current-track">▶ Currently Playing: <span id="currentTrackName">-</span></p>
+                    <p class="next-track">⏭ Up Next: <span id="nextTrackName">-</span></p>
+                    <p class="track-counter">Track <span id="currentTrackNum">0</span> of <span id="totalTracks">0</span></p>
+                </div>
+
+                <!-- Playlist Controls -->
+                <div class="playlist-controls">
+                    <button id="playAllBtn" class="playlist-control-btn primary">
+                        ▶ Play All
+                    </button>
+                    <button id="prevTrackBtn" class="playlist-control-btn" disabled>
+                        ⏮ Previous
+                    </button>
+                    <button id="nextTrackBtn" class="playlist-control-btn" disabled>
+                        ⏭ Next
+                    </button>
+                    <button id="clearPlaylistBtn" class="playlist-control-btn danger">
+                        🗑 Clear Playlist
+                    </button>
+                </div>
+
+                <!-- Playlist Items List -->
+                <div class="playlist-items">
+                    <p class="playlist-empty" id="playlistEmpty">Your playlist is empty. Add items above to get started!</p>
+                    <ul id="playlistList" class="playlist-list">
+                        <!-- Playlist items will be added here dynamically -->
+                    </ul>
                 </div>
             </div>
         </div>

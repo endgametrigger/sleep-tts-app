@@ -409,6 +409,16 @@ textarea::placeholder {
     cursor: not-allowed;
 }
 
+/* Playlist button variant */
+.playlist-btn {
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    margin-left: 15px;
+}
+
+.playlist-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+}
+
 /* Loading spinner animation */
 .spinner {
     border: 3px solid rgba(255, 255, 255, 0.3);
@@ -424,6 +434,53 @@ textarea::placeholder {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* ============================
+   PLAYLIST NAME INPUT SECTION
+   ============================ */
+
+.playlist-name-section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.playlist-name-section label {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.playlist-name-input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.playlist-name-input:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+.playlist-name-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.help-text {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    font-style: italic;
 }
 
 /* ============================
@@ -565,6 +622,218 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================
+   PLAYLIST SECTION
+   ============================ */
+
+/* Main playlist container */
+.playlist-section {
+    background-color: var(--accent-color);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    margin-top: 30px;
+    border: 2px solid var(--highlight-color);
+}
+
+.playlist-section h3 {
+    color: var(--success-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+/* Playlist progress indicators */
+.playlist-progress {
+    background-color: rgba(83, 52, 131, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--success-color);
+}
+
+.playlist-progress p {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.playlist-progress p:last-child {
+    margin-bottom: 0;
+}
+
+.current-track {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.next-track {
+    color: var(--text-secondary);
+}
+
+.track-counter {
+    color: var(--highlight-hover);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* Playlist controls buttons container */
+.playlist-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+/* Individual playlist control buttons */
+.playlist-control-btn {
+    flex: 1;
+    min-width: 120px;
+    min-height: 44px; /* Mobile-friendly touch target */
+    padding: 12px 20px;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.playlist-control-btn:hover:not(:disabled) {
+    border-color: var(--highlight-hover);
+    transform: translateY(-2px);
+}
+
+.playlist-control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Primary button (Play All) */
+.playlist-control-btn.primary {
+    background: linear-gradient(135deg, var(--success-color) 0%, #3da87e 100%);
+    color: white;
+}
+
+.playlist-control-btn.primary:hover:not(:disabled) {
+    box-shadow: 0 4px 15px rgba(78, 204, 163, 0.4);
+}
+
+/* Danger button (Clear Playlist) */
+.playlist-control-btn.danger {
+    background-color: rgba(238, 96, 85, 0.2);
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.playlist-control-btn.danger:hover:not(:disabled) {
+    background-color: rgba(238, 96, 85, 0.3);
+}
+
+/* Playlist items container */
+.playlist-items {
+    margin-top: 20px;
+}
+
+.playlist-empty {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Playlist list (unordered list) */
+.playlist-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Individual playlist item */
+.playlist-item {
+    background-color: var(--secondary-bg);
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border-left: 4px solid var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.playlist-item:hover {
+    transform: translateX(5px);
+    border-left-color: var(--highlight-color);
+}
+
+/* Currently playing item */
+.playlist-item.playing {
+    border-left-color: var(--success-color);
+    background-color: rgba(78, 204, 163, 0.1);
+}
+
+/* Playlist item header (title + provider) */
+.playlist-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.playlist-item-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.playlist-item-provider {
+    font-size: 0.85rem;
+    color: var(--highlight-hover);
+    background-color: rgba(83, 52, 131, 0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+/* Playlist item metadata */
+.playlist-item-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+/* Playlist item controls (remove, move up/down) */
+.playlist-item-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.playlist-item-btn {
+    min-width: 44px; /* Mobile-friendly */
+    min-height: 44px;
+    padding: 8px 15px;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playlist-item-btn:hover {
+    background-color: var(--highlight-color);
+    border-color: var(--highlight-hover);
+}
+
+.playlist-item-btn.remove {
+    background-color: rgba(238, 96, 85, 0.2);
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.playlist-item-btn.remove:hover {
+    background-color: rgba(238, 96, 85, 0.3);
+}
+
+/* ============================
    FOOTER
    ============================ */
 
@@ -611,6 +880,31 @@ footer p {
     .text-info {
         flex-direction: column;
         gap: 5px;
+    }
+
+    /* Playlist responsive */
+    .playlist-btn {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .playlist-controls {
+        flex-direction: column;
+    }
+
+    .playlist-control-btn {
+        width: 100%;
+    }
+
+    .playlist-item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .playlist-item-controls {
+        flex-wrap: wrap;
     }
 }
 

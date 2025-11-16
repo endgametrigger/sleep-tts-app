@@ -36,6 +36,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const styleSlider = document.getElementById('styleSlider');               // Expressiveness slider
     const styleValue = document.getElementById('styleValue');                 // Expressiveness value display
 
+    // Playlist elements
+    const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');     // "Add to Playlist" button
+    const playlistBtnText = document.getElementById('playlistBtnText');       // Text inside playlist button
+    const playlistSpinner = document.getElementById('playlistSpinner');       // Loading spinner for playlist button
+    const playlistEntryName = document.getElementById('playlistEntryName');   // Optional entry name input
+    const playlistSection = document.getElementById('playlistSection');       // Playlist section container
+    const playlistProgress = document.getElementById('playlistProgress');     // Progress display container
+    const currentTrackName = document.getElementById('currentTrackName');     // Currently playing track name
+    const nextTrackName = document.getElementById('nextTrackName');           // Next track name
+    const currentTrackNum = document.getElementById('currentTrackNum');       // Current track number
+    const totalTracks = document.getElementById('totalTracks');               // Total tracks count
+    const playAllBtn = document.getElementById('playAllBtn');                 // Play All button
+    const prevTrackBtn = document.getElementById('prevTrackBtn');             // Previous track button
+    const nextTrackBtn = document.getElementById('nextTrackBtn');             // Next track button
+    const clearPlaylistBtn = document.getElementById('clearPlaylistBtn');     // Clear playlist button
+    const playlistEmpty = document.getElementById('playlistEmpty');           // Empty playlist message
+    const playlistList = document.getElementById('playlistList');             // Playlist items list
+
     // ============================
     // VOICE OPTIONS FOR EACH PROVIDER
     // ============================
@@ -60,6 +78,34 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // ============================
+    // PLAYLIST DATA STRUCTURE
+    // ============================
+
+    /**
+     * Array to store playlist items
+     * Each item contains:
+     * - id: Unique identifier for the playlist item
+     * - name: Display name for the track
+     * - audioUrl: Blob URL pointing to the audio data
+     * - characterCount: Number of characters in the text
+     * - provider: Which TTS provider was used ('openai' or 'elevenlabs')
+     * - voice: Which voice was used
+     */
+    let playlist = [];
+
+    /**
+     * Track the current playing index in the playlist
+     * -1 means no track is currently playing
+     */
+    let currentPlayingIndex = -1;
+
+    /**
+     * Counter for auto-generating playlist entry names
+     * Used when user doesn't provide a custom name
+     */
+    let playlistCounter = 1;
+
+    // ============================
     // EVENT LISTENERS
     // ============================
 
@@ -80,6 +126,16 @@ document.addEventListener('DOMContentLoaded', function() {
     stabilitySlider.addEventListener('input', updateStabilityValue);
     similaritySlider.addEventListener('input', updateSimilarityValue);
     styleSlider.addEventListener('input', updateStyleValue);
+
+    // Playlist button event listeners
+    addToPlaylistBtn.addEventListener('click', addToPlaylist);
+    playAllBtn.addEventListener('click', playAll);
+    prevTrackBtn.addEventListener('click', playPreviousTrack);
+    nextTrackBtn.addEventListener('click', playNextTrack);
+    clearPlaylistBtn.addEventListener('click', clearPlaylist);
+
+    // Auto-advance to next track when current track ends
+    audioPlayer.addEventListener('ended', onTrackEnded);
 
     // ============================
     // FUNCTION: UPDATE VOICE OPTIONS
@@ -420,6 +476,467 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create and return a Blob from all the byte arrays
         return new Blob(byteArrays, { type: contentType });
     }
+
+    // ============================
+    // PLAYLIST FUNCTIONS
+    // ============================
+
+    /**
+     * Adds the current text to the playlist
+     * Generates audio and stores it for later playback
+     */
+    async function addToPlaylist() {
+        // Get the text from the textarea
+        const text = textInput.value.trim();
+
+        // Get the selected provider and voice
+        const selectedProvider = providerOpenAI.checked ? 'openai' : 'elevenlabs';
+        const selectedVoice = voiceSelect.value;
+
+        // Validation: Check if text is empty
+        if (!text) {
+            showError('Please enter some text to add to the playlist.');
+            return;
+        }
+
+        // Validation: Check if text is too long
+        if (text.length > 25000) {
+            showError('Text is too long. Please keep it under 25,000 characters.');
+            return;
+        }
+
+        // Hide any previous error messages
+        hideError();
+
+        // Update UI to show loading state for playlist button
+        setPlaylistLoadingState(true);
+
+        // Build the request body
+        const requestBody = {
+            text: text,
+            voice: selectedVoice,
+            provider: selectedProvider
+        };
+
+        // If using ElevenLabs, include advanced settings
+        if (selectedProvider === 'elevenlabs') {
+            requestBody.stability = parseFloat(stabilitySlider.value);
+            requestBody.similarity_boost = parseFloat(similaritySlider.value);
+            requestBody.style = parseFloat(styleSlider.value);
+        }
+
+        console.log(`Adding to playlist with ${selectedProvider} using voice: ${selectedVoice}`);
+
+        try {
+            // Make a POST request to our backend server to generate audio
+            const response = await fetch('http://localhost:3000/api/generate-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            // Parse the JSON response
+            const data = await response.json();
+
+            // Check if the request was successful
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to generate speech');
+            }
+
+            // Success! Convert the audio to a blob URL
+            const audioBlob = base64ToBlob(data.audio, 'audio/mpeg');
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // Get the entry name (use custom name if provided, otherwise auto-generate)
+            let entryName = playlistEntryName.value.trim();
+            if (!entryName) {
+                entryName = `Track ${playlistCounter}`;
+                playlistCounter++;
+            }
+
+            // Create a playlist item object
+            const playlistItem = {
+                id: Date.now(), // Use timestamp as unique ID
+                name: entryName,
+                audioUrl: audioUrl,
+                characterCount: data.characterCount,
+                provider: selectedProvider,
+                voice: selectedVoice
+            };
+
+            // Add the item to the playlist array
+            playlist.push(playlistItem);
+
+            console.log(`Added "${entryName}" to playlist (${playlist.length} items total)`);
+
+            // Update the playlist UI
+            renderPlaylist();
+
+            // Clear the entry name input for next addition
+            playlistEntryName.value = '';
+
+            // Show a success message by briefly updating the button text
+            playlistBtnText.textContent = '✓ Added to Playlist!';
+            setTimeout(() => {
+                playlistBtnText.textContent = 'Add to Playlist';
+            }, 2000);
+
+        } catch (error) {
+            // If anything went wrong, show the error message
+            console.error('Error adding to playlist:', error);
+            showError(error.message || 'Failed to add to playlist. Please try again.');
+        } finally {
+            // Always turn off the loading state
+            setPlaylistLoadingState(false);
+        }
+    }
+
+    /**
+     * Sets the loading state for the "Add to Playlist" button
+     * @param {boolean} isLoading - true to show loading, false to hide
+     */
+    function setPlaylistLoadingState(isLoading) {
+        if (isLoading) {
+            addToPlaylistBtn.disabled = true;
+            playlistBtnText.style.display = 'none';
+            playlistSpinner.style.display = 'inline-block';
+        } else {
+            addToPlaylistBtn.disabled = false;
+            playlistBtnText.style.display = 'inline';
+            playlistSpinner.style.display = 'none';
+        }
+    }
+
+    /**
+     * Renders the playlist UI
+     * Updates the playlist items list and shows/hides sections as needed
+     */
+    function renderPlaylist() {
+        // If playlist is empty, show empty message and hide playlist section
+        if (playlist.length === 0) {
+            playlistSection.style.display = 'none';
+            playlistList.innerHTML = '';
+            return;
+        }
+
+        // Show the playlist section
+        playlistSection.style.display = 'block';
+        playlistEmpty.style.display = 'none';
+
+        // Clear the existing list
+        playlistList.innerHTML = '';
+
+        // Create a list item for each playlist item
+        playlist.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'playlist-item';
+            li.dataset.index = index;
+
+            // Add "playing" class if this is the current track
+            if (index === currentPlayingIndex) {
+                li.classList.add('playing');
+            }
+
+            // Create the HTML content for this item
+            li.innerHTML = `
+                <div class="playlist-item-info">
+                    <div class="playlist-item-header">
+                        <strong class="playlist-item-name">${item.name}</strong>
+                        <span class="playlist-item-badge ${item.provider}">${item.provider.toUpperCase()}</span>
+                    </div>
+                    <div class="playlist-item-details">
+                        <span>Voice: ${item.voice}</span>
+                        <span>•</span>
+                        <span>${item.characterCount} characters</span>
+                    </div>
+                </div>
+                <div class="playlist-item-controls">
+                    <button class="playlist-item-btn" onclick="window.movePlaylistItemUp(${index})"
+                            ${index === 0 ? 'disabled' : ''} title="Move up">
+                        ▲
+                    </button>
+                    <button class="playlist-item-btn" onclick="window.movePlaylistItemDown(${index})"
+                            ${index === playlist.length - 1 ? 'disabled' : ''} title="Move down">
+                        ▼
+                    </button>
+                    <button class="playlist-item-btn danger" onclick="window.removePlaylistItem(${index})" title="Remove">
+                        ✕
+                    </button>
+                </div>
+            `;
+
+            playlistList.appendChild(li);
+        });
+
+        // Update the total tracks display
+        totalTracks.textContent = playlist.length;
+    }
+
+    /**
+     * Starts playing all tracks in the playlist from the beginning
+     */
+    function playAll() {
+        // Make sure there are tracks to play
+        if (playlist.length === 0) {
+            showError('Playlist is empty. Add some tracks first!');
+            return;
+        }
+
+        // Start playing from the first track
+        playTrackAtIndex(0);
+
+        // Show the progress display
+        playlistProgress.style.display = 'block';
+
+        console.log('Starting playlist playback...');
+    }
+
+    /**
+     * Plays the track at the specified index
+     * @param {number} index - The index of the track to play
+     */
+    function playTrackAtIndex(index) {
+        // Validate the index
+        if (index < 0 || index >= playlist.length) {
+            console.error('Invalid track index:', index);
+            return;
+        }
+
+        // Get the track
+        const track = playlist[index];
+
+        // Update the current playing index
+        currentPlayingIndex = index;
+
+        // Set the audio source to this track's URL
+        audioPlayer.src = track.audioUrl;
+
+        // Show the audio section
+        audioSection.style.display = 'block';
+
+        // Update the generation info
+        processedChars.textContent = track.characterCount;
+        actualCost.textContent = track.provider === 'openai' ?
+            ((track.characterCount / 1000) * 0.015).toFixed(4) : '0.00';
+
+        // Start playing
+        audioPlayer.play();
+
+        // Update the progress display
+        updatePlaylistProgress();
+
+        // Re-render the playlist to highlight the current track
+        renderPlaylist();
+
+        // Scroll to the audio section
+        audioSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        console.log(`Playing track ${index + 1}/${playlist.length}: ${track.name}`);
+    }
+
+    /**
+     * Updates the playlist progress display
+     * Shows current track, next track, and track counter
+     */
+    function updatePlaylistProgress() {
+        // If no track is playing, hide progress
+        if (currentPlayingIndex === -1 || playlist.length === 0) {
+            playlistProgress.style.display = 'none';
+            prevTrackBtn.disabled = true;
+            nextTrackBtn.disabled = true;
+            return;
+        }
+
+        // Show progress display
+        playlistProgress.style.display = 'block';
+
+        // Update current track name
+        currentTrackName.textContent = playlist[currentPlayingIndex].name;
+
+        // Update next track name
+        if (currentPlayingIndex < playlist.length - 1) {
+            nextTrackName.textContent = playlist[currentPlayingIndex + 1].name;
+        } else {
+            nextTrackName.textContent = 'End of playlist';
+        }
+
+        // Update track counter
+        currentTrackNum.textContent = currentPlayingIndex + 1;
+
+        // Enable/disable previous button
+        prevTrackBtn.disabled = currentPlayingIndex === 0;
+
+        // Enable/disable next button
+        nextTrackBtn.disabled = currentPlayingIndex === playlist.length - 1;
+    }
+
+    /**
+     * Plays the previous track in the playlist
+     */
+    function playPreviousTrack() {
+        if (currentPlayingIndex > 0) {
+            playTrackAtIndex(currentPlayingIndex - 1);
+        }
+    }
+
+    /**
+     * Plays the next track in the playlist
+     */
+    function playNextTrack() {
+        if (currentPlayingIndex < playlist.length - 1) {
+            playTrackAtIndex(currentPlayingIndex + 1);
+        }
+    }
+
+    /**
+     * Called when a track finishes playing
+     * Automatically advances to the next track
+     */
+    function onTrackEnded() {
+        // Only auto-advance if we're playing from the playlist
+        if (currentPlayingIndex !== -1 && currentPlayingIndex < playlist.length - 1) {
+            console.log('Track ended, auto-advancing to next track...');
+            playNextTrack();
+        } else if (currentPlayingIndex === playlist.length - 1) {
+            console.log('Playlist finished!');
+            // Reset to -1 when playlist is complete
+            currentPlayingIndex = -1;
+            updatePlaylistProgress();
+            renderPlaylist();
+        }
+    }
+
+    /**
+     * Removes a playlist item at the specified index
+     * @param {number} index - The index of the item to remove
+     */
+    function removePlaylistItem(index) {
+        // Validate the index
+        if (index < 0 || index >= playlist.length) {
+            console.error('Invalid index for removal:', index);
+            return;
+        }
+
+        // Get the item to remove
+        const item = playlist[index];
+
+        // IMPORTANT: Clean up the blob URL to free memory
+        // This prevents memory leaks when removing items
+        URL.revokeObjectURL(item.audioUrl);
+
+        console.log(`Removing "${item.name}" from playlist`);
+
+        // Remove the item from the array
+        playlist.splice(index, 1);
+
+        // Adjust currentPlayingIndex if necessary
+        if (currentPlayingIndex === index) {
+            // If we're removing the currently playing track, stop playback
+            audioPlayer.pause();
+            currentPlayingIndex = -1;
+            audioSection.style.display = 'none';
+        } else if (currentPlayingIndex > index) {
+            // If we're removing a track before the current one, adjust the index
+            currentPlayingIndex--;
+        }
+
+        // Re-render the playlist
+        renderPlaylist();
+        updatePlaylistProgress();
+    }
+
+    /**
+     * Moves a playlist item up in the queue
+     * @param {number} index - The index of the item to move up
+     */
+    function movePlaylistItemUp(index) {
+        // Can't move the first item up
+        if (index <= 0 || index >= playlist.length) {
+            return;
+        }
+
+        // Swap with the previous item
+        [playlist[index - 1], playlist[index]] = [playlist[index], playlist[index - 1]];
+
+        // Adjust currentPlayingIndex if necessary
+        if (currentPlayingIndex === index) {
+            currentPlayingIndex--;
+        } else if (currentPlayingIndex === index - 1) {
+            currentPlayingIndex++;
+        }
+
+        // Re-render the playlist
+        renderPlaylist();
+        updatePlaylistProgress();
+
+        console.log(`Moved item up to position ${index}`);
+    }
+
+    /**
+     * Moves a playlist item down in the queue
+     * @param {number} index - The index of the item to move down
+     */
+    function movePlaylistItemDown(index) {
+        // Can't move the last item down
+        if (index < 0 || index >= playlist.length - 1) {
+            return;
+        }
+
+        // Swap with the next item
+        [playlist[index], playlist[index + 1]] = [playlist[index + 1], playlist[index]];
+
+        // Adjust currentPlayingIndex if necessary
+        if (currentPlayingIndex === index) {
+            currentPlayingIndex++;
+        } else if (currentPlayingIndex === index + 1) {
+            currentPlayingIndex--;
+        }
+
+        // Re-render the playlist
+        renderPlaylist();
+        updatePlaylistProgress();
+
+        console.log(`Moved item down to position ${index + 2}`);
+    }
+
+    /**
+     * Clears all items from the playlist
+     */
+    function clearPlaylist() {
+        // Confirm with the user before clearing
+        if (playlist.length > 0 && !confirm('Are you sure you want to clear the entire playlist?')) {
+            return;
+        }
+
+        // Clean up all blob URLs to free memory
+        playlist.forEach(item => {
+            URL.revokeObjectURL(item.audioUrl);
+        });
+
+        console.log(`Cleared ${playlist.length} items from playlist`);
+
+        // Clear the playlist array
+        playlist = [];
+
+        // Reset state
+        currentPlayingIndex = -1;
+        playlistCounter = 1;
+
+        // Stop playback
+        audioPlayer.pause();
+        audioSection.style.display = 'none';
+
+        // Update UI
+        renderPlaylist();
+        updatePlaylistProgress();
+    }
+
+    // Make playlist functions available globally so they can be called from onclick attributes
+    window.removePlaylistItem = removePlaylistItem;
+    window.movePlaylistItemUp = movePlaylistItemUp;
+    window.movePlaylistItemDown = movePlaylistItemDown;
 
     // ============================
     // INITIALIZE ON PAGE LOAD
