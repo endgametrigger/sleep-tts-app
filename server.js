@@ -29,17 +29,23 @@ const PORT = process.env.PORT || 3000;
 // ============================
 
 // ElevenLabs uses unique voice IDs instead of simple names
-// These are the voice IDs for the most soothing/relaxing voices
+// Curated list of soothing voices perfect for sleep and relaxation
 // Creator Plan includes access to more premium voices
 const elevenLabsVoiceIds = {
-  'rachel': '21m00Tcm4TlvDq8ikWAM',  // Calm, clear, American female
-  'domi': 'AZnzlk1XvdvUeBnXmlld',    // Confident, strong female
-  'bella': 'EXAVITQu4vr4xnSDxMaL',   // Soft, gentle, young female
-  'lily': 'pFZP5JQG7iQjIQuC4Bku',    // British, gentle female
-  'charlotte': 'XB0fDUnXU5powFXDhCwa', // Swedish, calm female
-  'antoni': 'ErXwobaYiN019PkySvjV',  // Well-rounded, male
-  'callum': 'N2lVS1w4EtoT3dr4eOWO',  // British, smooth male
-  'arnold': 'VR6AewLTigWG4xSOukaG'   // Crisp, American male
+  'eryn': 'kdnRe2koJdOK4Ovxn2DI',      // Hyper Real Convo
+  'mellowmatt': 'IsEXLHzSvLH9UMB6SLHj', // Calm American
+  'angela': 'FUfBrNit0NNZAwb58KWH',    // Warm and Friendly
+  'dan': 'Ioq2c1GJee5RyqeoBIH3',       // Clear Middle England
+  'ellis': 'QxpsWUTZAxznFqyH1goJ',     // British Storyteller
+  'charlotte': 'XB0fDUnXU5powFXDhCwa', // Swedish, soothing
+  'rachel': '21m00Tcm4TlvDq8ikWAM',    // Calm, clear
+  'bella': 'EXAVITQu4vr4xnSDxMaL',     // Soft, gentle
+  'lily': 'pFZP5JQG7iQjIQuC4Bku',      // British, gentle
+  'domi': 'AZnzlk1XvdvUeBnXmlld',      // Confident but warm
+  'callum': 'N2lVS1w4EtoT3dr4eOWO',    // British, smooth
+  'antoni': 'ErXwobaYiN019PkySvjV',    // Well-rounded
+  'arnold': 'VR6AewLTigWG4xSOukaG',    // Crisp American
+  'josh': 'TxGEqnHWrfWFTfGW9XjX'       // Deep, calming
 };
 
 // ============================

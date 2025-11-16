@@ -66,15 +66,22 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // Define available voices for ElevenLabs TTS (Creator Plan)
+    // Curated list of soothing voices perfect for sleep and relaxation
     const elevenLabsVoices = [
-        { value: 'rachel', label: 'Rachel - Calm, clear, American female' },
-        { value: 'domi', label: 'Domi - Confident, strong female' },
-        { value: 'bella', label: 'Bella - Soft, gentle, young female' },
-        { value: 'lily', label: 'Lily - British, gentle female' },
-        { value: 'charlotte', label: 'Charlotte - Swedish, calm female' },
-        { value: 'antoni', label: 'Antoni - Well-rounded, male' },
-        { value: 'callum', label: 'Callum - British, smooth male' },
-        { value: 'arnold', label: 'Arnold - Crisp, American male' }
+        { value: 'eryn', label: 'Eryn - Hyper Real Convo' },
+        { value: 'mellowmatt', label: 'Mellow Matt - Calm American' },
+        { value: 'angela', label: 'Angela - Warm and Friendly' },
+        { value: 'dan', label: 'Dan - Clear Middle England' },
+        { value: 'ellis', label: 'Ellis - British Storyteller' },
+        { value: 'charlotte', label: 'Charlotte - Swedish, soothing' },
+        { value: 'rachel', label: 'Rachel - Calm, clear' },
+        { value: 'bella', label: 'Bella - Soft, gentle' },
+        { value: 'lily', label: 'Lily - British, gentle' },
+        { value: 'domi', label: 'Domi - Confident but warm' },
+        { value: 'callum', label: 'Callum - British, smooth' },
+        { value: 'antoni', label: 'Antoni - Well-rounded' },
+        { value: 'arnold', label: 'Arnold - Crisp American' },
+        { value: 'josh', label: 'Josh - Deep, calming' }
     ];
 
     // ============================

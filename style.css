@@ -260,6 +260,16 @@ textarea::placeholder {
     border-color: var(--highlight-hover);
 }
 
+/* Voice recommendation tip styling */
+.voice-tip {
+    display: block;
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-style: italic;
+    opacity: 0.9;
+}
+
 /* Styling for dropdown options */
 .voice-select option {
     background-color: var(--secondary-bg);
