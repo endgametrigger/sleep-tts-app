@@ -5,14 +5,17 @@ A simple, beginner-friendly text-to-speech web application using OpenAI's TTS AP
 ## Features
 
 - **Dual TTS Provider Support** - Choose between OpenAI and ElevenLabs for text-to-speech
-- **Multiple Premium Voices** - 3 OpenAI voices + 8 ElevenLabs Creator voices optimized for relaxation
+- **Multiple Premium Voices** - 3 OpenAI voices + 14 ElevenLabs Creator voices optimized for relaxation
+- **Playlist Queue System** - Queue multiple audio tracks for continuous playback
+- **Mobile Background Playback** - Audio keeps playing even when your phone screen locks! 📱
+- **Lock Screen Controls** - Control playback from your phone's lock screen or headphones
 - **ElevenLabs Creator Plan Integration** - Advanced voice controls with adjustable settings
 - **Voice Customization Sliders** - Fine-tune stability, clarity, and expressiveness (ElevenLabs only)
 - **Clean, Minimalist Interface** - Calming dark blue/purple color scheme designed for relaxation
 - **Adjustable Playback Speed** - Control speed from 0.75x (slower) to 1.25x (faster)
 - **Real-time Cost Estimation** - See estimated cost before generating audio
 - **Extended Character Limit** - Convert up to 25,000 characters at once
-- **Mobile Responsive** - Works great on phones, tablets, and desktops
+- **Mobile Optimized** - Large touch targets (44px) for easy mobile control
 - **Beginner-Friendly Code** - Extensively commented code to help you learn
 
 ## Tech Stack
@@ -129,6 +132,74 @@ You should see the Sleep TTS App interface!
 
 8. **Adjust Speed** - Use the slider to slow down (0.75x) or speed up (1.25x) the playback
 
+## Using the Playlist Feature 🎵
+
+The playlist feature is perfect for queuing multiple stories, chapters, or meditations for uninterrupted bedtime listening:
+
+1. **Add to Playlist** - Instead of clicking "Generate Audio", click "Add to Playlist"
+   - Give your track a custom name (e.g., "Chapter 1", "Meditation Part 1") or leave blank for auto-naming
+   - The track will be generated and added to your queue
+
+2. **Build Your Queue** - Add as many tracks as you want
+   - Mix and match OpenAI and ElevenLabs voices
+   - Each track can use different voices and providers
+   - Reorder tracks using the ▲ and ▼ buttons
+   - Remove unwanted tracks with the ✕ button
+
+3. **Play All** - Click the "▶ Play All" button to start the playlist
+   - Tracks play automatically one after another
+   - No gaps between tracks - seamless transitions
+   - The currently playing track is highlighted in green
+
+4. **Navigate** - Use the playlist controls:
+   - **⏮ Previous** - Go back to the previous track
+   - **⏭ Next** - Skip to the next track
+   - **🗑 Clear Playlist** - Remove all tracks (asks for confirmation)
+
+5. **Progress Tracking** - See what's playing and what's coming up:
+   - **Currently Playing:** Shows the active track name
+   - **Up Next:** Preview the next track in the queue
+   - **Track Counter:** See your position (e.g., "Track 2 of 5")
+
+## Mobile Background Playback 📱
+
+**CRITICAL FOR SLEEP USE:** The app uses the Media Session API to ensure your audio keeps playing even when your phone screen locks!
+
+### How It Works
+
+When you play audio from the app, it integrates with your phone's media controls:
+
+1. **Lock Screen Controls** - When your screen is locked, you'll see:
+   - Track name and voice information
+   - Play/Pause button
+   - Previous/Next track buttons
+   - Seek backward/forward (10 seconds)
+
+2. **Headphone Controls** - Use your headphone buttons:
+   - **Single press:** Play/Pause
+   - **Double press:** Next track
+   - **Triple press:** Previous track
+
+3. **Notification Controls** - Pull down your notification shade to see full media controls
+
+### Tips for Best Mobile Experience
+
+- **Keep the browser tab active** - Don't navigate away from the page
+- **Use headphones** - Better battery life and control
+- **Lock your screen** - The audio will keep playing! 🎉
+- **Airplane mode** - Once playlist is loaded, you can enable airplane mode
+- **Do Not Disturb** - Enable DND mode for uninterrupted sleep
+
+### Browser Compatibility
+
+The Media Session API works on:
+- ✅ **Chrome/Edge (Android)** - Full support
+- ✅ **Safari (iOS 13.4+)** - Full support
+- ✅ **Firefox (Android)** - Full support
+- ⚠️ **Desktop browsers** - Partial support (no lock screen, but works in notification area)
+
+**Best experience:** Use Chrome on Android or Safari on iOS for complete lock screen integration.
+
 ## Available Voices
 
 ### OpenAI Voices
@@ -136,15 +207,23 @@ You should see the Sleep TTS App interface!
 - **Alloy** - Neutral, calm, balanced
 - **Nova** - Friendly, gentle, feminine
 
-### ElevenLabs Voices (Creator Plan)
-- **Rachel** - Calm, clear, American female
-- **Domi** - Confident, strong female
-- **Bella** - Soft, gentle, young female
-- **Lily** - British, gentle female (NEW)
-- **Charlotte** - Swedish, calm female (NEW)
-- **Antoni** - Well-rounded, male
-- **Callum** - British, smooth male (NEW)
-- **Arnold** - Crisp, American male
+### ElevenLabs Voices (Creator Plan) - 14 Curated Voices
+All voices are carefully selected for their soothing, relaxing qualities perfect for bedtime:
+
+- **Eryn** - Hyper Real Convo
+- **Mellow Matt** - Calm American
+- **Angela** - Warm and Friendly
+- **Dan** - Clear Middle England
+- **Ellis** - British Storyteller
+- **Charlotte** - Swedish, soothing
+- **Rachel** - Calm, clear ⭐ *Recommended for bedtime stories*
+- **Bella** - Soft, gentle
+- **Lily** - British, gentle
+- **Domi** - Confident but warm
+- **Callum** - British, smooth ⭐ *Recommended for bedtime stories*
+- **Antoni** - Well-rounded
+- **Arnold** - Crisp American
+- **Josh** - Deep, calming
 
 **Advanced Settings** (ElevenLabs only):
 - Adjust voice consistency, clarity, and expressiveness with easy sliders
@@ -246,13 +325,15 @@ Every file is heavily commented to explain what each section does!
 
 Ideas for improving this app:
 - Add more TTS providers (Google Cloud TTS, Amazon Polly)
-- Save generated audio files for offline listening
+- Save generated audio files for offline listening (download button)
 - Add a history of previously generated audio
-- Support for even longer texts by splitting into chunks
+- Support for even longer texts by splitting into chunks automatically
 - Dark/light mode toggle
-- Download button for generated audio
-- Voice preview samples
+- Voice preview samples (hear voice before committing)
 - Bookmark favorite voice/provider combinations
+- Sleep timer (auto-stop after X minutes)
+- Fade out at the end of playlist
+- Custom artwork for lock screen
 
 ## Support
 

@@ -316,6 +316,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set the audio player's source to this URL
             audioPlayer.src = audioUrl;
 
+            // Update the lock screen media controls for single track playback
+            // This ensures lock screen controls work even when playing a single track
+            updateMediaSession({
+                name: 'Preview Audio',
+                provider: selectedProvider,
+                voice: selectedVoice,
+                characterCount: data.characterCount
+            });
+
             // Update the generation info display
             processedChars.textContent = data.characterCount;
             actualCost.textContent = data.estimatedCost.toFixed(4);
@@ -487,6 +496,105 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================
     // PLAYLIST FUNCTIONS
     // ============================
+
+    /**
+     * Updates the Media Session API metadata for lock screen controls
+     * This is CRITICAL for mobile background playback - it tells your phone's
+     * lock screen what's playing and enables hardware button controls
+     *
+     * @param {object} track - The current track object with name, provider, voice
+     */
+    function updateMediaSession(track) {
+        // Check if the browser supports the Media Session API
+        // This API is available on most modern mobile browsers (Chrome, Safari, Firefox)
+        if ('mediaSession' in navigator) {
+            // Set the metadata that appears on the lock screen
+            navigator.mediaSession.metadata = new MediaMetadata({
+                // Title appears as the main heading on lock screen
+                title: track.name,
+                // Artist appears as subtitle - we'll show which voice is being used
+                artist: `${track.provider.toUpperCase()} - ${track.voice}`,
+                // Album can be used for app name
+                album: 'Sleep TTS Playlist',
+                // Artwork is optional - shows an icon on the lock screen
+                // You can add custom artwork URLs here if you want
+                artwork: [
+                    { src: 'https://via.placeholder.com/96', sizes: '96x96', type: 'image/png' },
+                    { src: 'https://via.placeholder.com/128', sizes: '128x128', type: 'image/png' },
+                    { src: 'https://via.placeholder.com/192', sizes: '192x192', type: 'image/png' },
+                    { src: 'https://via.placeholder.com/256', sizes: '256x256', type: 'image/png' }
+                ]
+            });
+
+            console.log('🔒 Lock screen metadata updated:', track.name);
+        }
+    }
+
+    /**
+     * Sets up the Media Session API action handlers
+     * These connect your phone's lock screen buttons to the web app controls
+     * MUST be called once during initialization
+     */
+    function setupMediaSessionHandlers() {
+        // Check if the browser supports the Media Session API
+        if ('mediaSession' in navigator) {
+
+            // PLAY button on lock screen
+            // This gets triggered when user taps "Play" on lock screen or headphones
+            navigator.mediaSession.setActionHandler('play', () => {
+                console.log('🔒 Lock screen PLAY pressed');
+                audioPlayer.play();
+            });
+
+            // PAUSE button on lock screen
+            // This gets triggered when user taps "Pause" on lock screen or headphones
+            navigator.mediaSession.setActionHandler('pause', () => {
+                console.log('🔒 Lock screen PAUSE pressed');
+                audioPlayer.pause();
+            });
+
+            // NEXT TRACK button on lock screen
+            // This gets triggered when user taps "Next" or double-presses headphone button
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                console.log('🔒 Lock screen NEXT pressed');
+                // Only advance if there's a next track
+                if (currentPlayingIndex < playlist.length - 1) {
+                    playNextTrack();
+                }
+            });
+
+            // PREVIOUS TRACK button on lock screen
+            // This gets triggered when user taps "Previous" or triple-presses headphone button
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                console.log('🔒 Lock screen PREVIOUS pressed');
+                // Only go back if there's a previous track
+                if (currentPlayingIndex > 0) {
+                    playPreviousTrack();
+                }
+            });
+
+            // SEEK BACKWARD (optional - 10 seconds back)
+            // Some devices show this as a dedicated button
+            navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                console.log('🔒 Lock screen SEEK BACKWARD pressed');
+                audioPlayer.currentTime = Math.max(audioPlayer.currentTime - 10, 0);
+            });
+
+            // SEEK FORWARD (optional - 10 seconds forward)
+            // Some devices show this as a dedicated button
+            navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                console.log('🔒 Lock screen SEEK FORWARD pressed');
+                audioPlayer.currentTime = Math.min(
+                    audioPlayer.currentTime + 10,
+                    audioPlayer.duration
+                );
+            });
+
+            console.log('✅ Media Session API handlers initialized - Lock screen controls active!');
+        } else {
+            console.warn('⚠️ Media Session API not supported in this browser');
+        }
+    }
 
     /**
      * Adds the current text to the playlist
@@ -731,6 +839,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Start playing
         audioPlayer.play();
 
+        // Update the lock screen media controls with current track info
+        // This is CRITICAL for keeping audio playing when screen locks
+        updateMediaSession(track);
+
         // Update the progress display
         updatePlaylistProgress();
 
@@ -949,10 +1061,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // INITIALIZE ON PAGE LOAD
     // ============================
 
-    // Call updateCharacterCount once when page loads to show "0 / 4096 characters"
+    // Call updateCharacterCount once when page loads to show "0 / 25,000 characters"
     updateCharacterCount();
+
+    // Set up Media Session API for lock screen controls
+    // This enables background playback on mobile devices
+    setupMediaSessionHandlers();
 
     console.log('Sleep TTS App initialized!');
     console.log('Ready to convert text to speech 🌙');
+    console.log('📱 Mobile background playback enabled!');
 
 }); // End of DOMContentLoaded event listener

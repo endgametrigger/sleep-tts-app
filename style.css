@@ -396,6 +396,7 @@ textarea::placeholder {
     color: white;
     border: none;
     padding: 15px 40px;
+    min-height: 44px; /* Mobile-friendly touch target (Apple/Google guidelines) */
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: var(--border-radius);
@@ -530,6 +531,7 @@ textarea::placeholder {
 /* HTML5 audio player styling */
 audio {
     width: 100%;
+    min-height: 54px; /* Ensure adequate height for mobile touch targets */
     margin-bottom: 25px;
     border-radius: 8px;
     outline: none;
