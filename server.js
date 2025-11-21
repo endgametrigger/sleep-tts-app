@@ -11,6 +11,9 @@ const axios = require('axios');
 // CORS (Cross-Origin Resource Sharing) allows our frontend to talk to our backend
 const cors = require('cors');
 
+// OS module for getting network interface information (built-in Node.js module)
+const os = require('os');
+
 // Dotenv loads environment variables from .env file (keeps our API key secret)
 require('dotenv').config();
 
@@ -282,15 +285,39 @@ app.get('/api/health', (req, res) => {
 // START THE SERVER
 // ============================
 
-// Start listening for requests on the specified port
-app.listen(PORT, () => {
+/**
+ * Get the local network IP address for mobile access
+ * This helps users know what URL to use on their phone
+ */
+function getLocalIPAddress() {
+  const interfaces = os.networkInterfaces();
+
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
+// Start listening for requests on ALL network interfaces (0.0.0.0)
+// This allows connections from other devices on your network (mobile phones, tablets, etc.)
+app.listen(PORT, '0.0.0.0', () => {
+  const localIP = getLocalIPAddress();
+
   console.log('====================================');
   console.log(`🌙 Sleep TTS App is running!`);
-  console.log(`📡 Server: http://localhost:${PORT}`);
+  console.log(`📡 Local:    http://localhost:${PORT}`);
+  console.log(`📱 Mobile:   http://${localIP}:${PORT}`);
   console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
   console.log(`🔑 ElevenLabs API Key: ${process.env.ELEVENLABS_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
   console.log('====================================');
-  console.log('Open your browser and go to http://localhost:3000');
+  console.log('Desktop: Open http://localhost:3000 in your browser');
+  console.log(`Mobile:  Open http://${localIP}:3000 on your phone`);
+  console.log('(Make sure your phone is on the same WiFi network)');
   console.log('Press Ctrl+C to stop the server');
   console.log('====================================');
 });
