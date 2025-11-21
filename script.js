@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const playAllBtn = document.getElementById('playAllBtn');                 // Play All button
     const prevTrackBtn = document.getElementById('prevTrackBtn');             // Previous track button
     const nextTrackBtn = document.getElementById('nextTrackBtn');             // Next track button
+    const downloadPlaylistBtn = document.getElementById('downloadPlaylistBtn'); // Download playlist button
     const clearPlaylistBtn = document.getElementById('clearPlaylistBtn');     // Clear playlist button
     const playlistEmpty = document.getElementById('playlistEmpty');           // Empty playlist message
     const playlistList = document.getElementById('playlistList');             // Playlist items list
@@ -155,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     playAllBtn.addEventListener('click', playAll);
     prevTrackBtn.addEventListener('click', playPreviousTrack);
     nextTrackBtn.addEventListener('click', playNextTrack);
+    downloadPlaylistBtn.addEventListener('click', downloadPlaylist);
     clearPlaylistBtn.addEventListener('click', clearPlaylist);
 
     // Auto-advance to next track when current track ends
@@ -1066,6 +1068,203 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update UI
         renderPlaylist();
         updatePlaylistProgress();
+    }
+
+    /**
+     * Downloads the entire playlist as a single concatenated audio file
+     * This uses the Web Audio API to merge all tracks into one WAV file
+     */
+    async function downloadPlaylist() {
+        // Check if playlist is empty
+        if (playlist.length === 0) {
+            showError('Playlist is empty. Add some tracks first!');
+            return;
+        }
+
+        // Show loading state on button
+        downloadPlaylistBtn.disabled = true;
+        const originalText = downloadPlaylistBtn.textContent;
+        downloadPlaylistBtn.textContent = '⏳ Processing...';
+
+        try {
+            console.log(`Starting playlist download: ${playlist.length} tracks`);
+
+            // Create an audio context for processing audio data
+            // The AudioContext is the Web Audio API's main interface
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Array to store decoded audio buffers from each track
+            const audioBuffers = [];
+
+            // Step 1: Fetch and decode all audio tracks
+            console.log('Step 1/4: Fetching and decoding audio tracks...');
+            for (let i = 0; i < playlist.length; i++) {
+                const track = playlist[i];
+                console.log(`  Decoding track ${i + 1}/${playlist.length}: ${track.name}`);
+
+                // Fetch the blob data from the blob URL
+                const response = await fetch(track.audioUrl);
+                const arrayBuffer = await response.arrayBuffer();
+
+                // Decode the MP3 data into raw audio data (PCM)
+                // This converts compressed MP3 into uncompressed audio that we can manipulate
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                audioBuffers.push(audioBuffer);
+            }
+
+            // Step 2: Calculate total length of all tracks combined
+            console.log('Step 2/4: Calculating total duration...');
+            const totalLength = audioBuffers.reduce((sum, buffer) => sum + buffer.length, 0);
+            const sampleRate = audioBuffers[0].sampleRate;
+            const numberOfChannels = audioBuffers[0].numberOfChannels;
+
+            console.log(`  Total duration: ${(totalLength / sampleRate).toFixed(2)} seconds`);
+            console.log(`  Sample rate: ${sampleRate} Hz`);
+            console.log(`  Channels: ${numberOfChannels}`);
+
+            // Step 3: Create a new audio buffer to hold the concatenated audio
+            console.log('Step 3/4: Merging all tracks into single audio buffer...');
+            const mergedBuffer = audioContext.createBuffer(
+                numberOfChannels,
+                totalLength,
+                sampleRate
+            );
+
+            // Copy each track's audio data into the merged buffer
+            let offset = 0; // Current position in the merged buffer
+            for (let i = 0; i < audioBuffers.length; i++) {
+                const buffer = audioBuffers[i];
+                console.log(`  Adding track ${i + 1}/${audioBuffers.length} at offset ${(offset / sampleRate).toFixed(2)}s`);
+
+                // Copy each channel's data
+                for (let channel = 0; channel < numberOfChannels; channel++) {
+                    const sourceData = buffer.getChannelData(channel);
+                    const targetData = mergedBuffer.getChannelData(channel);
+
+                    // Copy the audio samples
+                    for (let j = 0; j < buffer.length; j++) {
+                        targetData[offset + j] = sourceData[j];
+                    }
+                }
+
+                offset += buffer.length;
+            }
+
+            // Step 4: Convert to WAV format and trigger download
+            console.log('Step 4/4: Encoding to WAV format and downloading...');
+            const wavBlob = audioBufferToWav(mergedBuffer);
+            const downloadUrl = URL.createObjectURL(wavBlob);
+
+            // Create a temporary link and click it to download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `Sleep-TTS-Playlist-${Date.now()}.wav`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up
+            URL.revokeObjectURL(downloadUrl);
+
+            console.log('✅ Playlist download complete!');
+
+        } catch (error) {
+            console.error('Error downloading playlist:', error);
+            showError(`Failed to download playlist: ${error.message}`);
+        } finally {
+            // Restore button state
+            downloadPlaylistBtn.disabled = false;
+            downloadPlaylistBtn.textContent = originalText;
+        }
+    }
+
+    /**
+     * Converts an AudioBuffer to WAV format (Blob)
+     * WAV is uncompressed audio format, easy to create on the client side
+     *
+     * @param {AudioBuffer} buffer - The audio buffer to convert
+     * @returns {Blob} - WAV file as a Blob
+     */
+    function audioBufferToWav(buffer) {
+        const numberOfChannels = buffer.numberOfChannels;
+        const sampleRate = buffer.sampleRate;
+        const format = 1; // PCM
+        const bitDepth = 16;
+
+        const bytesPerSample = bitDepth / 8;
+        const blockAlign = numberOfChannels * bytesPerSample;
+
+        const data = interleaveChannels(buffer);
+        const dataLength = data.length * bytesPerSample;
+        const bufferLength = 44 + dataLength; // 44 bytes for WAV header
+
+        const arrayBuffer = new ArrayBuffer(bufferLength);
+        const view = new DataView(arrayBuffer);
+
+        // Write WAV header
+        // "RIFF" chunk descriptor
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + dataLength, true);
+        writeString(view, 8, 'WAVE');
+
+        // "fmt " sub-chunk
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+        view.setUint16(20, format, true); // AudioFormat (1 for PCM)
+        view.setUint16(22, numberOfChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * blockAlign, true); // ByteRate
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bitDepth, true);
+
+        // "data" sub-chunk
+        writeString(view, 36, 'data');
+        view.setUint32(40, dataLength, true);
+
+        // Write audio data
+        let offset = 44;
+        for (let i = 0; i < data.length; i++) {
+            const sample = Math.max(-1, Math.min(1, data[i])); // Clamp to [-1, 1]
+            view.setInt16(offset, sample * 0x7FFF, true); // Convert to 16-bit PCM
+            offset += 2;
+        }
+
+        return new Blob([arrayBuffer], { type: 'audio/wav' });
+    }
+
+    /**
+     * Interleaves multiple audio channels into a single array
+     * For stereo: [L, R, L, R, L, R, ...]
+     *
+     * @param {AudioBuffer} buffer - The audio buffer
+     * @returns {Float32Array} - Interleaved audio data
+     */
+    function interleaveChannels(buffer) {
+        const numberOfChannels = buffer.numberOfChannels;
+        const length = buffer.length * numberOfChannels;
+        const result = new Float32Array(length);
+
+        let inputIndex = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            for (let channel = 0; channel < numberOfChannels; channel++) {
+                result[inputIndex++] = buffer.getChannelData(channel)[i];
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Writes a string to a DataView at the specified offset
+     *
+     * @param {DataView} view - The DataView to write to
+     * @param {number} offset - The byte offset
+     * @param {string} string - The string to write
+     */
+    function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
     }
 
     // Make playlist functions available globally so they can be called from onclick attributes

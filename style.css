@@ -742,6 +742,17 @@ input[type="range"]::-moz-range-thumb {
     background-color: rgba(238, 96, 85, 0.3);
 }
 
+/* Success button (Download Playlist) */
+.playlist-control-btn.success {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.playlist-control-btn.success:hover:not(:disabled) {
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+}
+
 /* Playlist items container */
 .playlist-items {
     margin-top: 20px;
