@@ -6,6 +6,22 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // ============================
+    // API CONFIGURATION
+    // ============================
+
+    /**
+     * Dynamic API URL that works on both desktop and mobile
+     * Uses window.location.origin to automatically detect the current URL
+     *
+     * Examples:
+     * - On desktop: http://localhost:3000
+     * - On mobile: http://192.168.1.100:3000 (your computer's IP)
+     *
+     * This fixes the "Failed to fetch" error on mobile devices
+     */
+    const API_BASE_URL = window.location.origin;
+
+    // ============================
     // GET REFERENCES TO HTML ELEMENTS
     // ============================
 
@@ -285,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Make a POST request to our backend server
             // fetch() is a built-in JavaScript function for making HTTP requests
-            const response = await fetch('http://localhost:3000/api/generate-speech', {
+            const response = await fetch(`${API_BASE_URL}/api/generate-speech`, {
                 method: 'POST',              // We're sending data, so use POST
                 headers: {
                     'Content-Type': 'application/json'  // Tell server we're sending JSON
@@ -644,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Make a POST request to our backend server to generate audio
-            const response = await fetch('http://localhost:3000/api/generate-speech', {
+            const response = await fetch(`${API_BASE_URL}/api/generate-speech`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

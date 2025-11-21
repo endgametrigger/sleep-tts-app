@@ -111,6 +111,47 @@ http://localhost:3000
 
 You should see the Sleep TTS App interface!
 
+### Accessing from Mobile Devices 📱
+
+To use the app on your phone (recommended for bedtime listening with lock screen controls):
+
+1. **Make sure your phone and computer are on the same WiFi network**
+
+2. **Find your computer's IP address:**
+
+   **On Windows:**
+   ```bash
+   ipconfig
+   ```
+   Look for "IPv4 Address" under your WiFi adapter (e.g., `192.168.1.100`)
+
+   **On Mac/Linux:**
+   ```bash
+   ifconfig | grep "inet "
+   ```
+   or
+   ```bash
+   ip addr show
+   ```
+   Look for your local IP (usually starts with `192.168.` or `10.0.`)
+
+3. **On your phone's browser, go to:**
+   ```
+   http://YOUR_IP_ADDRESS:3000
+   ```
+   Example: `http://192.168.1.100:3000`
+
+4. **The app will work exactly the same**, but now with full mobile features:
+   - Lock screen controls ✅
+   - Background playback ✅
+   - Headphone button integration ✅
+
+**Troubleshooting mobile access:**
+- Make sure your computer's firewall allows port 3000
+- Verify both devices are on the same WiFi network (not guest network)
+- Try disabling any VPN on either device
+- On Windows, you may need to allow Node.js through the firewall
+
 ## How to Use
 
 1. **Paste Your Text** - Copy any text you want to listen to (stories, articles, meditation scripts) and paste it into the textarea (up to 25,000 characters)
